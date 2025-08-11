@@ -136,3 +136,61 @@ body {
 @keyframes player-run { 0% { transform: translateX(0) } 40% { transform: translateX(18px) } 60% { transform: translateX(18px) } 100% { transform: translateX(0) } }
 @keyframes ball-kick { 0% { transform: translateX(0) translateY(0) } 35% { transform: translateX(60px) translateY(-22px) } 60% { transform: translateX(140px) translateY(-8px) } 70% { transform: translateX(190px) translateY(-4px) } 80% { transform: translateX(230px) translateY(0) } 100% { transform: translateX(0) translateY(0) } }
 @keyframes trail-grow { 0% { width: 0; opacity: 0 } 35% { width: 60px; opacity: .9 } 60% { width: 140px; opacity: .5 } 80% { width: 230px; opacity: .2 } 100% { width: 0; opacity: 0 } }
+
+/* Custom date picker styles */
+.rdp-custom {
+  --rdp-cell-size: 36px;
+  --rdp-accent-color: var(--primary);
+  --rdp-background-color: var(--background);
+  margin: 0;
+}
+
+.rdp-custom .rdp-months {
+  display: flex;
+}
+
+.rdp-custom .rdp-month {
+  margin: 0;
+}
+
+.rdp-custom .rdp-table {
+  margin: 0;
+}
+
+.rdp-custom .rdp-head_cell {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  padding: 0;
+  height: var(--rdp-cell-size);
+}
+
+.rdp-custom .rdp-cell {
+  padding: 0;
+}
+
+.rdp-custom .rdp-button {
+  border: none;
+  background: none;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  height: var(--rdp-cell-size);
+  width: var(--rdp-cell-size);
+  transition: all 0.2s;
+}
+
+.rdp-custom .rdp-button:hover {
+  background-color: var(--accent);
+}
+
+.rdp-custom .rdp-day_selected {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+
+.rdp-custom .rdp-day_today {
+  font-weight: bold;
+  color: var(--primary);
+}
