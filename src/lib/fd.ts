@@ -90,6 +90,15 @@ export function getTodayRange(offsetDays = 0) {
   return { from: d, to: d };
 }
 
+export function getNextNDaysRange(n: number) {
+  const start = new Date();
+  const end = new Date();
+  end.setDate(end.getDate() + n);
+  const dateFrom = start.toISOString().slice(0, 10);
+  const dateTo = end.toISOString().slice(0, 10);
+  return { from: dateFrom, to: dateTo };
+}
+
 export const TOP_LEAGUE_CODES: LeagueCode[] = LEAGUES.map((l) => l.code);
 
 

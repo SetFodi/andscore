@@ -1,20 +1,24 @@
 import { LEAGUES, TOP_LEAGUE_CODES } from "@/lib/constants";
-import { getMatchesByDateRange, getTodayRange } from "@/lib/fd";
+import { getMatchesByDateRange, getTodayRange, getNextNDaysRange } from "@/lib/fd";
 import MatchCard from "@/components/MatchCard";
 import Link from "next/link";
 import Image from "next/image";
 
 export default async function Home() {
   const { from, to } = getTodayRange(0);
+  const nx = getNextNDaysRange(7);
   let matches: Awaited<ReturnType<typeof getMatchesByDateRange>> = [];
+  let upcoming: Awaited<ReturnType<typeof getMatchesByDateRange>> = [];
   let hasApiKey = false;
   
   try {
     matches = await getMatchesByDateRange(TOP_LEAGUE_CODES, from, to);
+    upcoming = await getMatchesByDateRange(TOP_LEAGUE_CODES, nx.from, nx.to);
     hasApiKey = true;
   } catch {
     // When no API key or rate-limited, we show static content instead
     matches = [];
+    upcoming = [];
   }
 
   return (
@@ -66,6 +70,23 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {matches.slice(0, 6).map((m) => (
+              <MatchCard key={m.id} match={m} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Upcoming fixtures */}
+      {hasApiKey && upcoming.length > 0 && (
+        <section>
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Upcoming fixtures</h2>
+              <p className="text-muted-foreground">Next 7 days across top leagues</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {upcoming.slice(0, 6).map((m) => (
               <MatchCard key={m.id} match={m} />
             ))}
           </div>

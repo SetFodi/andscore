@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { LEAGUES, type LeagueCode } from "@/lib/constants";
-import { getMatchesByDateRange, getTodayRange, getStandings } from "@/lib/fd";
+import { getMatchesByDateRange, getTodayRange, getNextNDaysRange, getStandings } from "@/lib/fd";
 import StandingsTable from "@/components/StandingsTable";
 import MatchCard from "@/components/MatchCard";
 
@@ -11,10 +11,12 @@ export default async function LeaguePage({ params }: { params: Promise<{ code: L
 
   const season = new Date().getMonth() >= 6 ? new Date().getFullYear() : new Date().getFullYear() - 1;
   const { from, to } = getTodayRange(0);
+  const nx = getNextNDaysRange(7);
 
-  const [standings, matches] = await Promise.all([
+  const [standings, matches, upcoming] = await Promise.all([
     getStandings(league.code, season).catch(() => null),
     getMatchesByDateRange([league.code], from, to).catch(() => []),
+    getMatchesByDateRange([league.code], nx.from, nx.to).catch(() => []),
   ]);
 
   return (
@@ -69,6 +71,21 @@ export default async function LeaguePage({ params }: { params: Promise<{ code: L
               <div className="w-3 h-3 rounded-full bg-red-500" />
               <span>Relegation</span>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* Upcoming fixtures */}
+      {upcoming && upcoming.length > 0 && (
+        <section>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold tracking-tight">Upcoming fixtures</h2>
+            <p className="text-muted-foreground">Next 7 days</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {upcoming.map((m) => (
+              <MatchCard key={m.id} match={m} />
+            ))}
           </div>
         </section>
       )}

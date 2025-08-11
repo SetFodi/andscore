@@ -20,9 +20,7 @@ export function LeagueBadge({ code, large = false }: { code: LeagueCode; large?:
       className={`inline-flex items-center gap-2 rounded-full ${size}`}
       style={{ border: `1px solid ${league.accent}55`, color: league.accent }}
     >
-      <span className="logo-invert-dark">
-        <Image src={logoMap[league.code]} alt="" width={14} height={14} className="object-contain" />
-      </span>
+      <Image src={logoMap[league.code]} alt="" width={14} height={14} className={`object-contain ${league.code === "CL" ? "ucl-logo" : ""}`} />
       <span className="font-semibold">{league.name}</span>
     </Link>
   );

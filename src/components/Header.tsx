@@ -11,6 +11,7 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <nav className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
             <Link href="/" className="hover:text-foreground transition-colors">Today</Link>
+            <Link href="/matches" className="hover:text-foreground transition-colors">Fixtures</Link>
             <Link href="/leagues" className="hover:text-foreground transition-colors">Leagues</Link>
             <a href="https://www.football-data.org/" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">Data</a>
           </nav>

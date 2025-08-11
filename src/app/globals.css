@@ -87,10 +87,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Ensure dark logos remain visible (e.g., UCL) */
-.logo-invert-dark img, .logo-invert-dark svg {
-  filter: invert(1) hue-rotate(180deg) saturate(0.8);
-}
+/* Dark-mode only tweak for UCL black logo */
+.dark .ucl-logo { filter: invert(1) brightness(1.1) contrast(1.05); }
 
 .gradient-text {
   background: linear-gradient(135deg, var(--gradient-from), var(--gradient-via), var(--gradient-to));

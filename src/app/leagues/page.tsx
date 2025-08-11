@@ -31,7 +31,7 @@ export default function LeaguesPage() {
             
             <div className="relative">
               <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3 logo-invert-dark">
+                <div className="flex items-center gap-3">
                   <Image
                     src={
                       league.code === "PL" ? "/premier-league-1.svg" :
@@ -44,7 +44,7 @@ export default function LeaguesPage() {
                     alt=""
                     width={28}
                     height={28}
-                    className="object-contain"
+                    className={`object-contain ${league.code === "CL" ? "ucl-logo" : ""}`}
                   />
                   <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
                     {league.country}
