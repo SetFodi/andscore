@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { LEAGUES, type LeagueCode } from "@/lib/constants";
+import { LeagueIcon } from "@/components/icons/LeagueIcons";
 
 export function LeagueBadge({ code, large = false }: { code: LeagueCode; large?: boolean }) {
   const league = LEAGUES.find((l) => l.code === code)!;
@@ -11,6 +12,7 @@ export function LeagueBadge({ code, large = false }: { code: LeagueCode; large?:
       className={`inline-flex items-center gap-2 rounded-full ${size}`}
       style={{ border: `1px solid ${league.accent}55`, color: league.accent }}
     >
+      <LeagueIcon code={league.code} size={16} />
       <span className="font-semibold">{league.name}</span>
     </Link>
   );

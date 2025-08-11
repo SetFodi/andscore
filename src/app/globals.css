@@ -104,3 +104,21 @@ body {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+/* Football route transition */
+.football-roller {
+  position: relative;
+  height: 2.5rem;
+}
+.football-roller .football-ball {
+  position: absolute;
+  left: -2rem;
+  top: 0.25rem;
+  animation: ball-roll 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes ball-roll {
+  0% { transform: translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 4rem)) rotate(720deg); opacity: 0.9; }
+}

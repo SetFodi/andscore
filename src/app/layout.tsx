@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import GradientBackdrops from "@/components/GradientBackdrops";
 import { ANDSCORE_BRAND_NAME } from "@/lib/constants";
+import FootballTransition from "@/components/FootballTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}>
+        <FootballTransition />
         <Header />
         <main className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <GradientBackdrops />
