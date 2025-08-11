@@ -18,7 +18,7 @@ export const DEFAULT_LEAGUE: LeagueCode = "PL";
 
 export const FD_BASE_URL = "https://api.football-data.org/v4";
 
-export const ANDSCORE_BRAND_NAME = "andscore";
+export const ANDSCORE_BRAND_NAME = "AndScore";
 
 export const TOP_LEAGUE_CODES: LeagueCode[] = LEAGUES.map((l) => l.code);
 

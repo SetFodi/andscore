@@ -87,6 +87,11 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Ensure dark logos remain visible (e.g., UCL) */
+.logo-invert-dark img, .logo-invert-dark svg {
+  filter: invert(1) hue-rotate(180deg) saturate(0.8);
+}
+
 .gradient-text {
   background: linear-gradient(135deg, var(--gradient-from), var(--gradient-via), var(--gradient-to));
   -webkit-background-clip: text;
@@ -122,3 +127,14 @@ body {
   10% { opacity: 1; }
   100% { transform: translateX(calc(100vw + 4rem)) rotate(720deg); opacity: 0.9; }
 }
+
+/* Loading kick animation */
+.kick-scene { position: relative; width: 320px; height: 120px; }
+.kick-player { position: absolute; left: 0; bottom: 0; width: 32px; height: 32px; border-radius: 6px; background: linear-gradient(135deg, var(--gradient-from), var(--gradient-via)); box-shadow: 0 8px 24px rgba(0,0,0,.25); animation: player-run 1.2s ease-in-out infinite; }
+.kick-ball { position: absolute; left: 40px; bottom: 6px; width: 18px; height: 18px; border-radius: 999px; background: radial-gradient(circle at 40% 40%, #fff, #e2e8f0); box-shadow: 0 6px 16px rgba(0,0,0,.25); animation: ball-kick 1.2s ease-in-out infinite; }
+.kick-trail { position: absolute; left: 40px; bottom: 7px; width: 0; height: 2px; background: linear-gradient(90deg, var(--gradient-from), transparent); animation: trail-grow 1.2s ease-in-out infinite; transform-origin: left center; }
+.kick-net { position: absolute; right: 0; bottom: 0; width: 80px; height: 40px; border-radius: 8px; background: linear-gradient( to right, transparent 0%, rgba(148,163,184,.2) 40%, rgba(148,163,184,.15) 60%, transparent 100% ); overflow: hidden; }
+
+@keyframes player-run { 0% { transform: translateX(0) } 40% { transform: translateX(18px) } 60% { transform: translateX(18px) } 100% { transform: translateX(0) } }
+@keyframes ball-kick { 0% { transform: translateX(0) translateY(0) } 35% { transform: translateX(60px) translateY(-22px) } 60% { transform: translateX(140px) translateY(-8px) } 70% { transform: translateX(190px) translateY(-4px) } 80% { transform: translateX(230px) translateY(0) } 100% { transform: translateX(0) translateY(0) } }
+@keyframes trail-grow { 0% { width: 0; opacity: 0 } 35% { width: 60px; opacity: .9 } 60% { width: 140px; opacity: .5 } 80% { width: 230px; opacity: .2 } 100% { width: 0; opacity: 0 } }

@@ -18,20 +18,19 @@ export default function StandingsTable({ table }: { table: StandingTable[] }) {
         </thead>
         <tbody>
           {table.map((row, index) => (
-            <tr 
-              key={row.team.id} 
-              className={`border-t border-border/30 hover:bg-muted/20 transition-colors ${
-                index < 4 ? "bg-green-50/50" : 
-                index < 6 ? "bg-blue-50/50" : 
-                index >= table.length - 3 ? "bg-red-50/50" : ""
-              }`}
+            <tr
+              key={row.team.id}
+              className={"border-t border-border/30 hover:bg-muted/10 transition-colors"}
             >
               <td className="px-4 py-3 text-left">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  index < 4 ? "bg-green-500 text-white" :
-                  index < 6 ? "bg-blue-500 text-white" :
-                  index >= table.length - 3 ? "bg-red-500 text-white" :
-                  "bg-muted text-muted-foreground"
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-sm ${
+                  index < 4
+                    ? "bg-green-500 text-white"
+                    : index < 6
+                    ? "bg-blue-500 text-white"
+                    : index >= table.length - 3
+                    ? "bg-red-500 text-white"
+                    : "bg-muted text-muted-foreground"
                 }`}>
                   {row.position}
                 </div>

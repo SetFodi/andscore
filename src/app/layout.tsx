@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Sora } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import GradientBackdrops from "@/components/GradientBackdrops";
@@ -13,6 +13,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const brand = Sora({
+  variable: "--font-brand",
   subsets: ["latin"],
 });
 
@@ -35,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${brand.variable} antialiased min-h-screen`}>
         <FootballTransition />
         <Header />
         <main className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
