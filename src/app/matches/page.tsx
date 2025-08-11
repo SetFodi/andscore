@@ -1,14 +1,13 @@
 "use client";
 import { LEAGUES, TOP_LEAGUE_CODES, type LeagueCode } from "@/lib/constants";
-import { getMatchesByDateRange } from "@/lib/fd";
+import type { Match } from "@/lib/fd";
 import MatchCard from "@/components/MatchCard";
-import DatePicker from "@/components/DatePicker";
+import FiltersBar, { type FilterTab } from "@/components/FiltersBar";
 import { useEffect, useMemo, useState } from "react";
-import { format, addDays, subDays, isSameDay, isToday } from "date-fns";
+import { format, addDays, subDays, isSameDay, isToday, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 
-type MatchType = Awaited<ReturnType<typeof getMatchesByDateRange>>[number];
+type MatchType = Match;
 type ViewMode = "cards" | "list";
-type FilterTab = "all" | "live" | "today" | "upcoming" | "favorites";
 
 export default function MatchesPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -28,6 +27,18 @@ export default function MatchesPage() {
   const [loading, setLoading] = useState(false);
 
   // Fetch matches based on active tab and date
+  async function fetchMatches(fromDate: string, toDate: string) {
+    const qs = new URLSearchParams({
+      competitions: TOP_LEAGUE_CODES.join(","),
+      dateFrom: fromDate,
+      dateTo: toDate,
+    });
+    const res = await fetch(`/api/fd/matches?${qs.toString()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch matches");
+    const data = await res.json();
+    return (data.matches || []) as MatchType[];
+  }
+
   useEffect(() => {
     setLoading(true);
     let fromDate: string, toDate: string;
@@ -49,45 +60,40 @@ export default function MatchesPage() {
         toDate = format(addDays(selectedDate, 7), "yyyy-MM-dd");
     }
 
-    getMatchesByDateRange(TOP_LEAGUE_CODES, fromDate, toDate)
-      .then(setMatches)
+    fetchMatches(fromDate, toDate)
+      .then((m) => setMatches(m))
       .catch(() => setMatches([]))
       .finally(() => setLoading(false));
   }, [activeTab, selectedDate]);
 
-  // Filter and group matches
+  // Filter and group matches with exact-day logic and league enablement
   const filteredMatches = useMemo(() => {
-    let filtered = matches;
+    const enabledSet = new Set(TOP_LEAGUE_CODES.filter((c) => true));
+    let base = matches.filter((m) => enabledSet.has(m.competition.code as LeagueCode));
 
-    // Apply tab filters
-    switch (activeTab) {
-      case "live":
-        filtered = matches.filter(m => ["IN_PLAY", "PAUSED", "LIVE"].includes(m.status));
-        break;
-      case "today":
-        filtered = matches.filter(m => isSameDay(new Date(m.utcDate), selectedDate));
-        break;
-      case "upcoming":
-        filtered = matches.filter(m => new Date(m.utcDate) >= new Date(format(selectedDate, "yyyy-MM-dd")));
-        break;
-      case "favorites":
-        filtered = matches.filter(m => favoriteLeagues.includes(m.competition.code as LeagueCode));
-        break;
+    if (activeTab === "live") {
+      base = base.filter((m) => ["IN_PLAY", "PAUSED", "LIVE"].includes(m.status));
+    }
+    if (activeTab === "today") {
+      const start = startOfDay(selectedDate);
+      const end = endOfDay(selectedDate);
+      base = base.filter((m) => isWithinInterval(new Date(m.utcDate), { start, end }));
+    }
+    if (activeTab === "upcoming") {
+      const start = startOfDay(selectedDate);
+      base = base.filter((m) => new Date(m.utcDate) >= start);
+    }
+    if (activeTab === "favorites") {
+      base = base.filter((m) => favoriteLeagues.includes(m.competition.code as LeagueCode));
     }
 
-    // Group by date then by league
     const grouped: Record<string, Record<LeagueCode, MatchType[]>> = {};
-    
-    filtered.forEach(match => {
+    base.forEach((match) => {
       const dateKey = format(new Date(match.utcDate), "yyyy-MM-dd");
       const leagueCode = match.competition.code as LeagueCode;
-      
-      if (!grouped[dateKey]) grouped[dateKey] = {} as Record<LeagueCode, MatchType[]>;
-      if (!grouped[dateKey][leagueCode]) grouped[dateKey][leagueCode] = [];
-      
-      grouped[dateKey][leagueCode].push(match);
+      (grouped[dateKey] ||= {} as Record<LeagueCode, MatchType[]>);
+      (grouped[dateKey][leagueCode] ||= []).push(match);
     });
-
     return grouped;
   }, [matches, activeTab, selectedDate, favoriteLeagues]);
 
@@ -113,83 +119,51 @@ export default function MatchesPage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-16 z-40 glass-card border-b border-border/30 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-col gap-4">
-            {/* Top row: Title and view controls */}
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold gradient-text">Football Fixtures</h1>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setViewMode(viewMode === "cards" ? "list" : "cards")}
-                  className="p-2 rounded-xl glass-card border border-border/50 hover:scale-105 transition-all"
-                >
-                  {viewMode === "cards" ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <line x1="8" y1="6" x2="21" y2="6"></line>
-                      <line x1="8" y1="12" x2="21" y2="12"></line>
-                      <line x1="8" y1="18" x2="21" y2="18"></line>
-                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <rect x="3" y="3" width="7" height="7"></rect>
-                      <rect x="14" y="3" width="7" height="7"></rect>
-                      <rect x="14" y="14" width="7" height="7"></rect>
-                      <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Filter tabs */}
-            <div className="flex flex-wrap gap-2">
-              {([
-                { key: "all", label: "All", icon: "🌐" },
-                { key: "live", label: "Live", icon: "🔴" },
-                { key: "today", label: "Today", icon: "📅" },
-                { key: "upcoming", label: "Upcoming", icon: "⏭️" },
-                { key: "favorites", label: "Favorites", icon: "⭐" },
-              ] as const).map(({ key, label, icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-                    activeTab === key
-                      ? "bg-primary text-primary-foreground shadow-lg"
-                      : "glass-card border border-border/50 hover:scale-105"
-                  }`}
-                >
-                  <span>{icon}</span>
-                  <span className="text-sm">{label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Date controls */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <DatePicker selected={selectedDate} onSelect={setSelectedDate} />
-              
-              <div className="flex gap-2">
-                {quickDateButtons.map(({ label, date }) => (
-                  <button
-                    key={label}
-                    onClick={() => setSelectedDate(date)}
-                    className={`px-3 py-1.5 rounded-xl text-sm transition-all ${
-                      isSameDay(selectedDate, date)
-                        ? "bg-primary text-primary-foreground"
-                        : "glass-card border border-border/50 hover:scale-105"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+      <div className="sticky top-16 z-40 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold gradient-text">Football Fixtures</h1>
+          <button
+            onClick={() => setViewMode(viewMode === "cards" ? "list" : "cards")}
+            className="p-2 rounded-xl glass-card border border-border/50 hover:scale-105 transition-all"
+            aria-label="Toggle view"
+          >
+            {viewMode === "cards" ? (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            )}
+          </button>
+        </div>
+        <div className="max-w-7xl mx-auto px-4">
+          <FiltersBar
+            activeTab={activeTab}
+            onTabChange={(t) => {
+              setActiveTab(t);
+              // If user chooses Today while a different date is selected, snap to today
+              if (t === "today") setSelectedDate(new Date());
+            }}
+            selectedDate={selectedDate}
+            onDateChange={(d) => {
+              setSelectedDate(d);
+              if (activeTab === "today" && !isSameDay(d, new Date())) {
+                // If user picks a different day, switch to "all" to avoid the logical mismatch
+                setActiveTab("all");
+              }
+            }}
+            quickDates={quickDateButtons}
+          />
         </div>
       </div>
 
