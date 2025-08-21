@@ -1,13 +1,12 @@
 "use client";
+import { format, addDays, isToday, isSameDay } from "date-fns";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
-import { DayPicker } from "react-day-picker";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import {
   CalendarIcon,
   GlobeAltIcon,
-  PlayIcon,
   ClockIcon,
   StarIcon,
   ChevronDownIcon
@@ -32,11 +31,7 @@ export default function FiltersBar({
   onDateChange: (d: Date) => void;
   quickDates: Array<{ label: string; date: Date }>;
 }) {
-  const displayDate = selectedDate.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const displayDate = format(selectedDate, "PP");
 
   const filterTabs = [
     {
@@ -152,7 +147,7 @@ export default function FiltersBar({
               </motion.button>
             </PopoverTrigger>
 
-            <PopoverContent align="end" className="w-80 p-4">
+            <PopoverContent align="end" className="w-96 p-4">
               <div className="space-y-4">
                 {/* Quick Date Selection */}
                 <div>
@@ -179,14 +174,42 @@ export default function FiltersBar({
                   </div>
                 </div>
 
-                {/* Calendar */}
+                {/* Date List - Flashscore Style */}
                 <div className="border-t border-border/50 pt-4">
-                  <DayPicker
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(d) => d && onDateChange(d)}
-                    className="rdp-custom"
-                  />
+                  <div className="space-y-1 max-h-48 overflow-y-auto">
+                    {(() => {
+                      const dates = [];
+                      for (let i = -7; i <= 7; i++) {
+                        const date = addDays(selectedDate, i);
+                        dates.push(date);
+                      }
+                      return dates.map((date, index) => {
+                        const isSelectedDate = isSameDay(date, selectedDate);
+                        const isTodayDate = isToday(date);
+
+                        return (
+                          <button
+                            key={index}
+                            onClick={() => onDateChange(date)}
+                            className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                              isSelectedDate
+                                ? 'bg-primary text-primary-foreground'
+                                : isTodayDate
+                                ? 'bg-accent text-accent-foreground hover:bg-accent/80'
+                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                            }`}
+                          >
+                            <div className="flex justify-between items-center">
+                              <span>{format(date, "EEE, MMM d")}</span>
+                              {isTodayDate && (
+                                <span className="text-xs text-primary">Today</span>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
                 </div>
               </div>
             </PopoverContent>
