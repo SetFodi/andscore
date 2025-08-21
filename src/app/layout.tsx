@@ -8,6 +8,7 @@ import LoadingProvider from "@/components/LoadingProvider";
 import MatchModalProvider from "@/components/MatchModalProvider";
 import { ANDSCORE_BRAND_NAME } from "@/lib/constants";
 import FootballTransition from "@/components/FootballTransition";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default function RootLayout({
               <GradientBackdrops />
               {children}
             </main>
+            <Footer />
             <MobileNav />
           </MatchModalProvider>
         </LoadingProvider>

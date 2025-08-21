@@ -11,7 +11,7 @@ import {
   CalendarDaysIcon,
   TrophyIcon,
   ArrowRightIcon,
-  SparklesIcon
+  // SparklesIcon
 } from "@heroicons/react/24/outline";
 import { PlayIcon as PlaySolidIcon } from "@heroicons/react/24/solid";
 
@@ -19,8 +19,6 @@ export default function Home() {
   const { openMatchModal } = useMatchModal();
   const [matches, setMatches] = useState<Match[]>([]);
   const [upcoming, setUpcoming] = useState<Match[]>([]);
-  const [hasApiKey, setHasApiKey] = useState(false);
-  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -33,12 +31,10 @@ export default function Home() {
 
         setMatches(todayMatches);
         setUpcoming(upcomingMatches);
-        setHasApiKey(true);
       } catch {
         // When no API key or rate-limited, we show static content instead
         setMatches([]);
         setUpcoming([]);
-        setHasApiKey(false);
       }
     };
 
@@ -55,18 +51,9 @@ export default function Home() {
         <div className="relative max-w-6xl mx-auto">
           {/* Status Badge */}
           <div className="flex justify-center mb-6">
-            <Badge variant={hasApiKey ? "success" : "warning"} className="px-4 py-2 text-sm font-semibold">
-              {hasApiKey ? (
-                <>
-                  <PlaySolidIcon className="w-4 h-4 mr-2" />
-                  Live Matches Available
-                </>
-              ) : (
-                <>
-                  <SparklesIcon className="w-4 h-4 mr-2" />
-                                        Still in Beta
-                </>
-              )}
+            <Badge variant="success" className="px-4 py-2 text-sm font-semibold">
+              <PlaySolidIcon className="w-4 h-4 mr-2" />
+              Live Football Data
             </Badge>
           </div>
 
@@ -95,27 +82,14 @@ export default function Home() {
               <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
 
-            {!hasApiKey ? (
-              <a
-                href="https://www.football-data.org/client/register"
-                target="_blank"
-                rel="noreferrer"
-                className="group inline-flex items-center justify-center px-8 py-4 rounded-xl glass-card border border-border/50 font-semibold text-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover:-translate-y-1"
-              >
-                <SparklesIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                Get API Key
-                <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </a>
-            ) : (
-              <Link
-                href="/matches"
-                className="group inline-flex items-center justify-center px-8 py-4 rounded-xl glass-card border border-border/50 font-semibold text-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover:-translate-y-1"
-              >
-                <CalendarDaysIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                View All Fixtures
-                <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            )}
+            <Link
+              href="/matches"
+              className="group inline-flex items-center justify-center px-8 py-4 rounded-xl glass-card border border-border/50 font-semibold text-lg hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 hover:-translate-y-1"
+            >
+              <CalendarDaysIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+              View All Fixtures
+              <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
 
           {/* Stats Row */}
@@ -137,7 +111,7 @@ export default function Home() {
       </section>
 
       {/* Today's Matches Section */}
-      {hasApiKey && matches.length > 0 && (
+      {matches.length > 0 && (
         <section className="relative">
           <div className="flex items-end justify-between gap-4 mb-8">
             <div>
@@ -171,7 +145,7 @@ export default function Home() {
       )}
 
       {/* Upcoming fixtures */}
-      {hasApiKey && upcoming.length > 0 && (
+      {upcoming.length > 0 && (
         <section>
           <div className="flex items-end justify-between gap-4 mb-6">
             <div>
