@@ -4,6 +4,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useFavorites } from "@/hooks/useFavorites";
 import {
   CalendarIcon,
   GlobeAltIcon,
@@ -31,6 +32,7 @@ export default function FiltersBar({
   onDateChange: (d: Date) => void;
   quickDates: Array<{ label: string; date: Date }>;
 }) {
+  const { favoriteTeams } = useFavorites();
   const displayDate = format(selectedDate, "PP");
 
   const filterTabs = [
@@ -61,9 +63,9 @@ export default function FiltersBar({
     },
     {
       value: "favorites",
-      label: "Favorites",
+      label: favoriteTeams.length > 0 ? `Favorites (${favoriteTeams.length})` : "Favorites",
       icon: activeTab === "favorites" ? StarSolidIcon : StarIcon,
-      description: "Your starred teams"
+      description: favoriteTeams.length > 0 ? `${favoriteTeams.length} favorite teams` : "No favorite teams yet"
     },
   ];
 

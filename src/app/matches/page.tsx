@@ -6,6 +6,7 @@ import FiltersBar, { type FilterTab } from "@/components/FiltersBar";
 import { Badge } from "@/components/ui/badge";
 import { MatchCardSkeleton } from "@/components/ui/skeleton";
 import { useMatchModal } from "@/components/MatchModalProvider";
+import { useFavorites } from "@/hooks/useFavorites";
 import { useEffect, useMemo, useState } from "react";
 import { format, addDays, subDays, isSameDay, isToday, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +23,7 @@ type ViewMode = "cards" | "list";
 
 export default function MatchesPage() {
   const { openMatchModal } = useMatchModal();
+  const { favoriteTeams } = useFavorites();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<FilterTab>("today");
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
@@ -58,7 +60,11 @@ export default function MatchesPage() {
     // Check if selected date is different from today
     const isSelectedDateToday = isSameDay(selectedDate, new Date());
 
-    if (!isSelectedDateToday) {
+    if (activeTab === "favorites") {
+      // For favorites, fetch a smaller range to avoid API errors
+      fromDate = format(subDays(selectedDate, 3), "yyyy-MM-dd");
+      toDate = format(addDays(selectedDate, 7), "yyyy-MM-dd");
+    } else if (!isSelectedDateToday) {
       // If a specific date is selected, fetch matches around that date
       fromDate = format(subDays(selectedDate, 3), "yyyy-MM-dd");
       toDate = format(addDays(selectedDate, 3), "yyyy-MM-dd");
@@ -108,7 +114,10 @@ export default function MatchesPage() {
       const start = startOfDay(selectedDate);
       base = base.filter((m) => new Date(m.utcDate) >= start);
     } else if (activeTab === "favorites") {
-      base = base.filter((m) => favoriteLeagues.includes(m.competition.code as LeagueCode));
+      const favoriteTeamIds = new Set(favoriteTeams.map(t => t.id));
+      base = base.filter((m) =>
+        favoriteTeamIds.has(m.homeTeam.id) || favoriteTeamIds.has(m.awayTeam.id)
+      );
     }
     // For "all" tab with today's date, show all matches in the fetched range
 
@@ -120,7 +129,7 @@ export default function MatchesPage() {
       (grouped[dateKey][leagueCode] ||= []).push(match);
     });
     return grouped;
-  }, [matches, activeTab, selectedDate, favoriteLeagues]);
+  }, [matches, activeTab, selectedDate, favoriteLeagues, favoriteTeams]);
 
   const toggleFavorite = (code: LeagueCode) => {
     setFavoriteLeagues(prev => {
@@ -243,14 +252,28 @@ export default function MatchesPage() {
               exit={{ opacity: 0, scale: 0.9 }}
             >
               <div className="glass-card rounded-2xl p-12 border border-border/50 max-w-lg mx-auto">
-                <div className="text-8xl mb-6">⚽</div>
-                <h3 className="text-2xl font-bold mb-4">No matches found</h3>
+                <div className="text-8xl mb-6">
+                  {activeTab === "favorites" ? "❤️" : "⚽"}
+                </div>
+                <h3 className="text-2xl font-bold mb-4">
+                  {activeTab === "favorites" && favoriteTeams.length === 0
+                    ? "No favorite teams yet"
+                    : "No matches found"}
+                </h3>
                 <p className="text-muted-foreground text-lg mb-6">
-                  Try selecting a different date or filter to see more matches.
+                  {activeTab === "favorites" && favoriteTeams.length === 0
+                    ? "Click the heart icon next to team names in match details to add them to your favorites."
+                    : activeTab === "favorites" && favoriteTeams.length > 0
+                    ? `No upcoming matches found for your ${favoriteTeams.length} favorite team${favoriteTeams.length > 1 ? 's' : ''} in the next 3 weeks.`
+                    : "Try selecting a different date or filter to see more matches."}
                 </p>
                 <Badge variant="outline" className="px-4 py-2">
                   <SparklesIcon className="w-4 h-4 mr-2" />
-                  Tip: Use the filters above to explore different dates
+                  {activeTab === "favorites" && favoriteTeams.length === 0
+                    ? "Tip: Open any match to favorite teams"
+                    : activeTab === "favorites" && favoriteTeams.length > 0
+                    ? "Tip: Try the 'All Matches' or 'Upcoming' filters to see more games"
+                    : "Tip: Use the filters above to explore different dates"}
                 </Badge>
               </div>
             </motion.div>

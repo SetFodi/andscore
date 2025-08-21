@@ -1,9 +1,10 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { XMarkIcon, ClockIcon, MapPinIcon, TvIcon } from "@heroicons/react/24/outline";
-import { PlayIcon as PlaySolidIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
+import { XMarkIcon, ClockIcon, MapPinIcon, TvIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { PlayIcon as PlaySolidIcon, CheckCircleIcon, HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import { Badge } from "./ui/badge";
 import { TeamAvatar } from "./ui/avatar";
+import { useFavorites } from "@/hooks/useFavorites";
 import type { Match } from "@/lib/fd";
 import { format } from "date-fns";
 
@@ -16,6 +17,7 @@ interface MatchDetailsModalProps {
 export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetailsModalProps) {
   if (!match) return null;
 
+  const { isFavoriteTeam, toggleFavoriteTeam } = useFavorites();
   const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status);
   const isFinished = ["FINISHED", "AWARDED"].includes(match.status);
   const isUpcoming = ["SCHEDULED", "TIMED"].includes(match.status);
@@ -100,13 +102,29 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
                 {/* Match Header */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <TeamAvatar 
+                    <TeamAvatar
                       teamName={match.homeTeam.name}
                       logoUrl={match.homeTeam.crest}
                       size="lg"
                     />
                     <div className="text-center">
-                      <h3 className="font-semibold text-lg">{match.homeTeam.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-lg">{match.homeTeam.name}</h3>
+                        <button
+                          onClick={() => toggleFavoriteTeam({
+                            id: match.homeTeam.id,
+                            name: match.homeTeam.name,
+                            crest: match.homeTeam.crest
+                          })}
+                          className="p-1 rounded-full hover:bg-accent transition-colors"
+                        >
+                          {isFavoriteTeam(match.homeTeam.id) ? (
+                            <HeartSolidIcon className="w-5 h-5 text-red-500" />
+                          ) : (
+                            <HeartIcon className="w-5 h-5 text-muted-foreground hover:text-red-500" />
+                          )}
+                        </button>
+                      </div>
                       <p className="text-sm text-muted-foreground">Home</p>
                     </div>
                   </div>
@@ -124,10 +142,26 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
 
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <h3 className="font-semibold text-lg">{match.awayTeam.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleFavoriteTeam({
+                            id: match.awayTeam.id,
+                            name: match.awayTeam.name,
+                            crest: match.awayTeam.crest
+                          })}
+                          className="p-1 rounded-full hover:bg-accent transition-colors"
+                        >
+                          {isFavoriteTeam(match.awayTeam.id) ? (
+                            <HeartSolidIcon className="w-5 h-5 text-red-500" />
+                          ) : (
+                            <HeartIcon className="w-5 h-5 text-muted-foreground hover:text-red-500" />
+                          )}
+                        </button>
+                        <h3 className="font-semibold text-lg">{match.awayTeam.name}</h3>
+                      </div>
                       <p className="text-sm text-muted-foreground">Away</p>
                     </div>
-                    <TeamAvatar 
+                    <TeamAvatar
                       teamName={match.awayTeam.name}
                       logoUrl={match.awayTeam.crest}
                       size="lg"
