@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Sora } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import GradientBackdrops from "@/components/GradientBackdrops";
+import MobileNav from "@/components/MobileNav";
 import { ANDSCORE_BRAND_NAME } from "@/lib/constants";
 import FootballTransition from "@/components/FootballTransition";
 
@@ -43,10 +44,11 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} ${brand.variable} antialiased min-h-screen`}>
         <FootballTransition />
         <Header />
-        <main className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <main className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 pb-20 lg:pb-8">
           <GradientBackdrops />
           {children}
         </main>
+        <MobileNav />
       </body>
     </html>
   );

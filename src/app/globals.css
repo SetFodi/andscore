@@ -1,45 +1,103 @@
 @import "tailwindcss";
 
 :root {
+  /* Base colors - Light theme with football-inspired palette */
   --background: #fafbfc;
-  --foreground: #0f172a;
+  --foreground: #0a0e1a;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --primary: #6366f1;
-  --primary-foreground: #f8fafc;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #475569;
-  --muted: #f1f5f9;
+  --card-foreground: #0a0e1a;
+
+  /* Primary - Football green with energy */
+  --primary: #00b04f;
+  --primary-foreground: #ffffff;
+  --primary-hover: #009943;
+
+  /* Secondary - Pitch colors */
+  --secondary: #f0f9f4;
+  --secondary-foreground: #166534;
+
+  /* Muted - Subtle backgrounds */
+  --muted: #f8fafc;
   --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
+
+  /* Accent - Match highlights */
+  --accent: #f0f9f4;
+  --accent-foreground: #166534;
+
+  /* Borders and inputs */
   --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #6366f1;
-  --gradient-from: #6366f1;
-  --gradient-via: #8b5cf6;
+  --input: #f1f5f9;
+  --ring: #00b04f;
+
+  /* Football-themed gradients */
+  --gradient-from: #00b04f;
+  --gradient-via: #10b981;
   --gradient-to: #06b6d4;
+
+  /* Status colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Live match indicator */
+  --live: #ef4444;
+  --live-glow: rgba(239, 68, 68, 0.3);
+
+  /* Football field colors */
+  --field-primary: #00b04f;
+  --field-secondary: #16a34a;
+  --field-lines: #ffffff;
 }
 
 [data-theme="dark"] {
-  --background: #020617;
+  /* Base colors - Dark theme with football stadium atmosphere */
+  --background: #0a0e1a;
   --foreground: #f8fafc;
-  --card: #0f172a;
+  --card: #1a1f2e;
   --card-foreground: #f8fafc;
-  --primary: #818cf8;
-  --primary-foreground: #1e293b;
+
+  /* Primary - Bright football green for dark mode */
+  --primary: #22c55e;
+  --primary-foreground: #0a0e1a;
+  --primary-hover: #16a34a;
+
+  /* Secondary - Dark pitch tones */
   --secondary: #1e293b;
-  --secondary-foreground: #cbd5e1;
+  --secondary-foreground: #94a3b8;
+
+  /* Muted - Dark backgrounds */
   --muted: #1e293b;
   --muted-foreground: #94a3b8;
+
+  /* Accent - Dark mode highlights */
   --accent: #1e293b;
   --accent-foreground: #f8fafc;
+
+  /* Borders and inputs */
   --border: #334155;
-  --input: #334155;
-  --ring: #818cf8;
-  --gradient-from: #818cf8;
-  --gradient-via: #a855f7;
+  --input: #1e293b;
+  --ring: #22c55e;
+
+  /* Football-themed gradients for dark */
+  --gradient-from: #22c55e;
+  --gradient-via: #10b981;
   --gradient-to: #0891b2;
+
+  /* Status colors - adjusted for dark */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Live match indicator */
+  --live: #ef4444;
+  --live-glow: rgba(239, 68, 68, 0.4);
+
+  /* Football field colors for dark */
+  --field-primary: #22c55e;
+  --field-secondary: #16a34a;
+  --field-lines: #ffffff;
 }
 
 @theme inline {
@@ -49,6 +107,7 @@
   --color-card-foreground: var(--card-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -61,8 +120,18 @@
   --color-gradient-from: var(--gradient-from);
   --color-gradient-via: var(--gradient-via);
   --color-gradient-to: var(--gradient-to);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-live: var(--live);
+  --color-live-glow: var(--live-glow);
+  --color-field-primary: var(--field-primary);
+  --color-field-secondary: var(--field-secondary);
+  --color-field-lines: var(--field-lines);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-brand: var(--font-brand);
 }
 
 * {
@@ -76,15 +145,82 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Enhanced glass card effects */
 .glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 [data-theme="dark"] .glass-card {
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(26, 31, 46, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .glass-card:hover {
+  background: rgba(26, 31, 46, 0.9);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Football-themed components */
+.match-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.match-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--field-primary), var(--field-secondary));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.match-card:hover::before {
+  opacity: 1;
+}
+
+.live-indicator {
+  position: relative;
+  color: var(--live);
+  font-weight: 600;
+}
+
+.live-indicator::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--live);
+  border-radius: 50%;
+  animation: pulse-live 2s infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 var(--live-glow);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 8px transparent;
+  }
 }
 
 /* Dark-mode only tweak for UCL black logo */
@@ -106,6 +242,158 @@ body {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* Football field pattern background */
+.field-pattern {
+  background-image:
+    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Enhanced button styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: var(--primary-foreground);
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(0, 176, 79, 0.3);
+}
+
+/* League badge styles */
+.league-badge {
+  position: relative;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.league-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, currentColor, transparent);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+}
+
+/* Score display styles */
+.score-display {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--primary);
+  text-shadow: 0 2px 4px rgba(0, 176, 79, 0.2);
+}
+
+/* Team logo styles */
+.team-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.team-logo:hover {
+  transform: scale(1.1);
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 176, 79, 0.3);
+}
+
+/* Mobile-specific enhancements */
+@media (max-width: 768px) {
+  /* Reduce motion for mobile performance */
+  .glass-card:hover {
+    transform: none;
+  }
+
+  /* Better touch targets */
+  .btn-primary,
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improved mobile spacing */
+  .match-card {
+    padding: 1rem;
+  }
+
+  /* Mobile-friendly animations */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transform: none;
+  }
+
+  [data-theme="dark"] .glass-card:hover {
+    background: rgba(26, 31, 46, 0.85);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Better touch feedback */
+  .glass-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+  }
+
+  .gradient-text {
+    background: none;
+    color: var(--primary);
+  }
 }
 
 /* Football route transition */

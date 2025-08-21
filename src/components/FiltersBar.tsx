@@ -3,6 +3,19 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { DayPicker } from "react-day-picker";
 import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import {
+  CalendarIcon,
+  GlobeAltIcon,
+  PlayIcon,
+  ClockIcon,
+  StarIcon,
+  ChevronDownIcon
+} from "@heroicons/react/24/outline";
+import {
+  PlayIcon as PlaySolidIcon,
+  StarIcon as StarSolidIcon
+} from "@heroicons/react/24/solid";
 
 export type FilterTab = "all" | "live" | "today" | "upcoming" | "favorites";
 
@@ -25,71 +38,162 @@ export default function FiltersBar({
     year: "numeric",
   });
 
-  return (
-    <div className="glass-card border border-border/50 rounded-2xl p-3 flex flex-wrap items-center gap-3 justify-between">
-      {/* Tabs */}
-      <ToggleGroup.Root
-        type="single"
-        value={activeTab}
-        onValueChange={(v) => v && onTabChange(v as FilterTab)}
-        className="flex items-center gap-2"
-      >
-        {([
-          { value: "all", label: "All", icon: "🌐" },
-          { value: "live", label: "Live", icon: "🔴" },
-          { value: "today", label: "Today", icon: "📅" },
-          { value: "upcoming", label: "Upcoming", icon: "⏭️" },
-          { value: "favorites", label: "Favorites", icon: "⭐" },
-        ] as const).map((t) => (
-          <ToggleGroup.Item
-            key={t.value}
-            value={t.value}
-            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground glass-card border border-border/50 px-3 py-2 rounded-xl text-sm font-medium"
-          >
-            <span className="mr-1">{t.icon}</span>
-            {t.label}
-          </ToggleGroup.Item>
-        ))}
-      </ToggleGroup.Root>
+  const filterTabs = [
+    {
+      value: "all",
+      label: "All Matches",
+      icon: GlobeAltIcon,
+      description: "View all matches"
+    },
+    {
+      value: "live",
+      label: "Live",
+      icon: PlaySolidIcon,
+      description: "Currently playing",
+      variant: "live" as const
+    },
+    {
+      value: "today",
+      label: "Today",
+      icon: CalendarIcon,
+      description: "Today's fixtures"
+    },
+    {
+      value: "upcoming",
+      label: "Upcoming",
+      icon: ClockIcon,
+      description: "Future matches"
+    },
+    {
+      value: "favorites",
+      label: "Favorites",
+      icon: activeTab === "favorites" ? StarSolidIcon : StarIcon,
+      description: "Your starred teams"
+    },
+  ];
 
-      {/* Date popover */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <button className="flex items-center gap-2 px-3 py-2 rounded-xl glass-card border border-border/50 text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            {displayDate}
-          </button>
-        </PopoverTrigger>
-        <PopoverContent align="end">
-          <div className="grid grid-cols-3 gap-2 text-sm mb-3">
-            {quickDates.map((q) => (
-              <button
-                key={q.label}
-                onClick={() => onDateChange(q.date)}
-                className={`px-3 py-2 rounded-xl text-sm glass-card border border-border/50 ${
-                  selectedDate.toDateString() === q.date.toDateString()
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:scale-[1.02] transition"
-                }`}
+  return (
+    <motion.div
+      className="glass-card border border-border/50 rounded-2xl p-4 shadow-lg"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between">
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2">
+          <ToggleGroup.Root
+            type="single"
+            value={activeTab}
+            onValueChange={(v) => v && onTabChange(v as FilterTab)}
+            className="flex flex-wrap items-center gap-2"
+          >
+            {filterTabs.map((tab) => {
+              const IconComponent = tab.icon;
+              const isActive = activeTab === tab.value;
+
+              return (
+                <ToggleGroup.Item
+                  key={tab.value}
+                  value={tab.value}
+                  className={`
+                    group relative overflow-hidden rounded-xl px-4 py-2.5 text-sm font-medium
+                    transition-all duration-300 ease-out
+                    ${isActive
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                      : 'glass-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50'
+                    }
+                    ${tab.variant === 'live' && isActive ? 'animate-pulse' : ''}
+                  `}
+                >
+                  <div className="flex items-center gap-2 relative z-10">
+                    <IconComponent className={`w-4 h-4 ${tab.variant === 'live' && isActive ? 'text-white' : ''}`} />
+                    <span>{tab.label}</span>
+                  </div>
+
+                  {/* Hover effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-primary/10 rounded-xl"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+
+                  {/* Active indicator */}
+                  {isActive && (
+                    <motion.div
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-foreground rounded-full"
+                      layoutId="activeTab"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </ToggleGroup.Item>
+              );
+            })}
+          </ToggleGroup.Root>
+        </div>
+
+        {/* Enhanced Date Picker */}
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="text-xs font-medium">
+            Filter by Date
+          </Badge>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <motion.button
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-card border border-border/50 text-sm font-medium hover:border-primary/50 transition-all duration-300 group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                {q.label}
-              </button>
-            ))}
-          </div>
-          <DayPicker
-            mode="single"
-            selected={selectedDate}
-            onSelect={(d) => d && onDateChange(d)}
-            className="rdp-custom"
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
+                <CalendarIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="font-semibold">{displayDate}</span>
+                <ChevronDownIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-all duration-300 group-hover:rotate-180" />
+              </motion.button>
+            </PopoverTrigger>
+
+            <PopoverContent align="end" className="w-80 p-4">
+              <div className="space-y-4">
+                {/* Quick Date Selection */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-3 text-foreground">Quick Select</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {quickDates.map((q) => {
+                      const isSelected = selectedDate.toDateString() === q.date.toDateString();
+                      return (
+                        <motion.button
+                          key={q.label}
+                          onClick={() => onDateChange(q.date)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            isSelected
+                              ? "bg-primary text-primary-foreground shadow-md"
+                              : "glass-card border border-border/50 hover:border-primary/50 hover:bg-primary/5"
+                          }`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          {q.label}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Calendar */}
+                <div className="border-t border-border/50 pt-4">
+                  <DayPicker
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(d) => d && onDateChange(d)}
+                    className="rdp-custom"
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
