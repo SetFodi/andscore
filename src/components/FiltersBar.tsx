@@ -10,7 +10,9 @@ import {
   GlobeAltIcon,
   ClockIcon,
   StarIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ViewColumnsIcon,
+  ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import {
   PlayIcon as PlaySolidIcon,
@@ -25,12 +27,18 @@ export default function FiltersBar({
   selectedDate,
   onDateChange,
   quickDates,
+  isSidebar = false,
+  viewMode,
+  onViewModeChange
 }: {
   activeTab: FilterTab;
   onTabChange: (t: FilterTab) => void;
   selectedDate: Date;
   onDateChange: (d: Date) => void;
   quickDates: Array<{ label: string; date: Date }>;
+  isSidebar?: boolean;
+  viewMode?: "cards" | "list";
+  onViewModeChange?: (mode: "cards" | "list") => void;
 }) {
   const { favoriteTeams } = useFavorites();
   const displayDate = format(selectedDate, "PP");
@@ -71,19 +79,30 @@ export default function FiltersBar({
 
   return (
     <motion.div
-      className="glass-card border border-border/50 rounded-2xl p-4 shadow-lg md:filters-bar-mobile"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
+      className={`glass-card border border-border/50 rounded-2xl shadow-lg ${
+        isSidebar
+          ? "p-6 space-y-6 bg-gradient-to-br from-background/50 to-background/30 backdrop-blur-xl"
+          : "p-4 md:filters-bar-mobile"
+      }`}
+      initial={{ opacity: 0, y: isSidebar ? 0 : -20, x: isSidebar ? -20 : 0 }}
+      animate={{ opacity: 1, y: 0, x: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className={isSidebar ? "space-y-6" : "flex flex-col gap-4 md:flex-row md:items-center md:justify-between"}>
         {/* Filter Tabs */}
-        <div className="w-full md:w-auto">
+        <div className={isSidebar ? "space-y-3" : "w-full md:w-auto"}>
+          {isSidebar && (
+            <h3 className="text-lg font-semibold text-foreground mb-4">Filters</h3>
+          )}
           <ToggleGroup.Root
             type="single"
             value={activeTab}
             onValueChange={(v) => v && onTabChange(v as FilterTab)}
-            className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center"
+            className={
+              isSidebar
+                ? "flex flex-col gap-2"
+                : "grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center"
+            }
           >
             {filterTabs.map((tab) => {
               const IconComponent = tab.icon;
@@ -94,9 +113,12 @@ export default function FiltersBar({
                   key={tab.value}
                   value={tab.value}
                   className={`
-                    group relative overflow-hidden rounded-xl px-3 py-3 text-sm font-medium
-                    transition-all duration-300 ease-out min-h-[48px] w-full
-                    md:px-4 md:py-2.5 md:w-auto md:min-h-auto
+                    group relative overflow-hidden rounded-xl text-sm font-medium
+                    transition-all duration-300 ease-out w-full
+                    ${isSidebar
+                      ? 'px-4 py-3 justify-start'
+                      : 'px-3 py-3 min-h-[48px] md:px-4 md:py-2.5 md:w-auto md:min-h-auto'
+                    }
                     ${isActive
                       ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
                       : 'glass-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50'
@@ -104,7 +126,9 @@ export default function FiltersBar({
                     ${tab.variant === 'live' && isActive ? 'animate-pulse' : ''}
                   `}
                 >
-                  <div className="flex items-center justify-center gap-2 relative z-10 md:justify-start">
+                  <div className={`flex items-center gap-3 relative z-10 ${
+                    isSidebar ? 'justify-start' : 'justify-center md:justify-start'
+                  }`}>
                     <IconComponent className={`w-4 h-4 ${tab.variant === 'live' && isActive ? 'text-white' : ''}`} />
                     <span className="text-xs md:text-sm">{tab.label}</span>
                   </div>
@@ -132,16 +156,23 @@ export default function FiltersBar({
         </div>
 
         {/* Enhanced Date Picker */}
-        <div className="w-full md:w-auto">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-            <Badge variant="outline" className="text-xs font-medium self-start md:self-auto">
-              Filter by Date
-            </Badge>
+        <div className={isSidebar ? "space-y-3" : "w-full md:w-auto"}>
+          {isSidebar && (
+            <h4 className="text-md font-semibold text-foreground">Date Filter</h4>
+          )}
+          <div className={isSidebar ? "space-y-3" : "flex flex-col gap-2 md:flex-row md:items-center md:gap-3"}>
+            {!isSidebar && (
+              <Badge variant="outline" className="text-xs font-medium self-start md:self-auto">
+                Filter by Date
+              </Badge>
+            )}
 
             <Popover>
               <PopoverTrigger asChild>
                 <motion.button
-                  className="flex items-center justify-between gap-2 px-4 py-3 rounded-xl glass-card border border-border/50 text-sm font-medium hover:border-primary/50 transition-all duration-300 group w-full md:w-auto md:py-2.5"
+                  className={`flex items-center justify-between gap-2 px-4 py-3 rounded-xl glass-card border border-border/50 text-sm font-medium hover:border-primary/50 transition-all duration-300 group w-full ${
+                    isSidebar ? '' : 'md:w-auto md:py-2.5'
+                  }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -221,6 +252,44 @@ export default function FiltersBar({
             </PopoverContent>
           </Popover>
           </div>
+
+          {/* View Mode Toggle - Only in sidebar */}
+          {isSidebar && viewMode && onViewModeChange && (
+            <>
+              <div className="border-t border-border/30"></div>
+              <div className="space-y-3">
+                <h4 className="text-md font-semibold text-foreground">View Mode</h4>
+                <div className="flex gap-2">
+                <motion.button
+                  onClick={() => onViewModeChange("cards")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    viewMode === "cards"
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'glass-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <ViewColumnsIcon className="w-4 h-4" />
+                  Cards
+                </motion.button>
+                <motion.button
+                  onClick={() => onViewModeChange("list")}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    viewMode === "list"
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'glass-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <ListBulletIcon className="w-4 h-4" />
+                  List
+                </motion.button>
+              </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </motion.div>

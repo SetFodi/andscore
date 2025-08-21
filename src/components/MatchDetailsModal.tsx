@@ -15,9 +15,10 @@ interface MatchDetailsModalProps {
 }
 
 export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetailsModalProps) {
+  const { isFavoriteTeam, toggleFavoriteTeam } = useFavorites();
+
   if (!match) return null;
 
-  const { isFavoriteTeam, toggleFavoriteTeam } = useFavorites();
   const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status);
   const isFinished = ["FINISHED", "AWARDED"].includes(match.status);
   const isUpcoming = ["SCHEDULED", "TIMED"].includes(match.status);

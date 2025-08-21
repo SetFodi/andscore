@@ -160,7 +160,7 @@ export default function MatchesPage() {
         transition={{ duration: 0.3 }}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:mb-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
               <Badge variant="success" className="px-3 py-1 text-sm font-semibold self-start">
                 <CalendarDaysIcon className="w-4 h-4 mr-2" />
@@ -200,37 +200,75 @@ export default function MatchesPage() {
             </div>
           </div>
 
-          <FiltersBar
-            activeTab={activeTab}
-            onTabChange={(t) => {
-              setActiveTab(t);
-              // If user chooses Today while a different date is selected, snap to today
-              if (t === "today") setSelectedDate(new Date());
-            }}
-            selectedDate={selectedDate}
-            onDateChange={(d) => {
-              setSelectedDate(d);
-              if (activeTab === "today" && !isSameDay(d, new Date())) {
-                // If user picks a different day, switch to "all" to avoid the logical mismatch
-                setActiveTab("all");
-              }
-            }}
-            quickDates={quickDateButtons}
-          />
         </div>
       </motion.div>
-      {/* Enhanced Content */}
+
+      {/* Main Content with Sidebar Layout */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div
-              key="loading"
-              className="space-y-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <div className="text-center py-8">
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <motion.div
+            className="hidden lg:block w-80 flex-shrink-0"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            <div className="sticky top-24 space-y-4">
+              <FiltersBar
+                activeTab={activeTab}
+                onTabChange={(t) => {
+                  setActiveTab(t);
+                  // If user chooses Today while a different date is selected, snap to today
+                  if (t === "today") setSelectedDate(new Date());
+                }}
+                selectedDate={selectedDate}
+                onDateChange={(d) => {
+                  setSelectedDate(d);
+                  if (activeTab === "today" && !isSameDay(d, new Date())) {
+                    // If user picks a different day, switch to "all" to avoid the logical mismatch
+                    setActiveTab("all");
+                  }
+                }}
+                quickDates={quickDateButtons}
+                isSidebar={true}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+              />
+            </div>
+          </motion.div>
+
+          {/* Mobile Filters - Show on smaller screens */}
+          <div className="lg:hidden w-full mb-6">
+            <FiltersBar
+              activeTab={activeTab}
+              onTabChange={(t) => {
+                setActiveTab(t);
+                if (t === "today") setSelectedDate(new Date());
+              }}
+              selectedDate={selectedDate}
+              onDateChange={(d) => {
+                setSelectedDate(d);
+                if (activeTab === "today" && !isSameDay(d, new Date())) {
+                  setActiveTab("all");
+                }
+              }}
+              quickDates={quickDateButtons}
+              isSidebar={false}
+            />
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
+            <AnimatePresence mode="wait">
+              {loading ? (
+                <motion.div
+                  key="loading"
+                  className="space-y-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="text-center py-8">
                 <div className="flex items-center justify-center gap-3 mb-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                   <span className="text-lg font-medium text-muted-foreground">Loading matches...</span>
@@ -369,7 +407,9 @@ export default function MatchesPage() {
                 ))}
             </motion.div>
           )}
-        </AnimatePresence>
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );

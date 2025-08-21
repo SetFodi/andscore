@@ -49,11 +49,13 @@ export default function MatchModalProvider({ children }: MatchModalProviderProps
   return (
     <MatchModalContext.Provider value={value}>
       {children}
-      <MatchDetailsModal
-        match={selectedMatch}
-        isOpen={isModalOpen}
-        onClose={closeMatchModal}
-      />
+      {isModalOpen && selectedMatch && (
+        <MatchDetailsModal
+          match={selectedMatch}
+          isOpen={isModalOpen}
+          onClose={closeMatchModal}
+        />
+      )}
     </MatchModalContext.Provider>
   );
 }
