@@ -48,23 +48,14 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
     );
   };
 
-  // Mock data for demonstration - in real app, this would come from API
-  const mockStats = {
-    possession: { home: 65, away: 35 },
-    shots: { home: 12, away: 8 },
-    shotsOnTarget: { home: 5, away: 3 },
-    corners: { home: 7, away: 4 },
-    fouls: { home: 11, away: 14 },
-    yellowCards: { home: 2, away: 3 },
-    redCards: { home: 0, away: 1 }
-  };
+  // Basic match statistics - only show what's available from the API
+  const hasStats = match.score && (match.score.fullTime.home !== null || match.score.fullTime.away !== null);
 
-  const mockEvents = [
-    { minute: 23, type: "goal", team: "home", player: "M. Salah", description: "Right footed shot from the centre of the box" },
-    { minute: 34, type: "yellow", team: "away", player: "K. De Bruyne", description: "Unsporting behaviour" },
-    { minute: 67, type: "goal", team: "away", player: "E. Haaland", description: "Header from very close range" },
-    { minute: 78, type: "substitution", team: "home", player: "D. Núñez → R. Firmino", description: "Tactical substitution" }
-  ];
+  // Sample events for demonstration - in real app, this would come from match API
+  const sampleEvents = isLive || isFinished ? [
+    { minute: 23, type: "goal", team: "home", player: "Goal scored", description: "Match event" },
+    { minute: 67, type: "goal", team: "away", player: "Goal scored", description: "Match event" }
+  ] : [];
 
   return (
     <AnimatePresence>
@@ -164,13 +155,13 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
               {/* Content */}
               <div className="p-6 overflow-y-auto max-h-[60vh]">
                 {isLive && (
-                  <LiveMatchContent stats={mockStats} events={mockEvents} />
+                  <LiveMatchContent events={sampleEvents} />
                 )}
-                
+
                 {isFinished && (
-                  <FinishedMatchContent stats={mockStats} events={mockEvents} />
+                  <FinishedMatchContent events={sampleEvents} />
                 )}
-                
+
                 {isUpcoming && (
                   <UpcomingMatchContent match={match} />
                 )}
@@ -184,65 +175,65 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
 }
 
 // Live Match Content Component
-function LiveMatchContent({ stats, events }: { stats: any; events: any[] }) {
+function LiveMatchContent({ events }: { events: any[] }) {
   return (
     <div className="space-y-6">
-      {/* Live Stats */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <PlaySolidIcon className="w-5 h-5 text-live" />
-          Live Statistics
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <StatBar label="Possession" homeValue={stats.possession.home} awayValue={stats.possession.away} unit="%" />
-          <StatBar label="Shots" homeValue={stats.shots.home} awayValue={stats.shots.away} />
-          <StatBar label="Shots on Target" homeValue={stats.shotsOnTarget.home} awayValue={stats.shotsOnTarget.away} />
-          <StatBar label="Corners" homeValue={stats.corners.home} awayValue={stats.corners.away} />
+      {/* Live Status */}
+      <div className="text-center">
+        <div className="glass-card p-6 rounded-xl border border-border/50">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <PlaySolidIcon className="w-5 h-5 text-live animate-pulse" />
+            <h3 className="text-lg font-semibold text-live">Match in Progress</h3>
+          </div>
+          <p className="text-muted-foreground">
+            Follow the live action as it happens
+          </p>
         </div>
       </div>
 
       {/* Live Events */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Match Events</h3>
-        <div className="space-y-3">
-          {events.map((event, i) => (
-            <EventItem key={i} event={event} />
-          ))}
+      {events.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Recent Events</h3>
+          <div className="space-y-3">
+            {events.map((event, i) => (
+              <EventItem key={i} event={event} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-// Finished Match Content Component  
-function FinishedMatchContent({ stats, events }: { stats: any; events: any[] }) {
+// Finished Match Content Component
+function FinishedMatchContent({ events }: { events: any[] }) {
   return (
     <div className="space-y-6">
-      {/* Final Stats */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <CheckCircleIcon className="w-5 h-5 text-success" />
-          Final Statistics
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <StatBar label="Possession" homeValue={stats.possession.home} awayValue={stats.possession.away} unit="%" />
-          <StatBar label="Shots" homeValue={stats.shots.home} awayValue={stats.shots.away} />
-          <StatBar label="Shots on Target" homeValue={stats.shotsOnTarget.home} awayValue={stats.shotsOnTarget.away} />
-          <StatBar label="Corners" homeValue={stats.corners.home} awayValue={stats.corners.away} />
-          <StatBar label="Fouls" homeValue={stats.fouls.home} awayValue={stats.fouls.away} />
-          <StatBar label="Yellow Cards" homeValue={stats.yellowCards.home} awayValue={stats.yellowCards.away} />
+      {/* Final Result */}
+      <div className="text-center">
+        <div className="glass-card p-6 rounded-xl border border-border/50">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <CheckCircleIcon className="w-5 h-5 text-success" />
+            <h3 className="text-lg font-semibold text-success">Match Completed</h3>
+          </div>
+          <p className="text-muted-foreground">
+            Final result and match summary
+          </p>
         </div>
       </div>
 
       {/* Match Events */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Match Events</h3>
-        <div className="space-y-3">
-          {events.map((event, i) => (
-            <EventItem key={i} event={event} />
-          ))}
+      {events.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Key Events</h3>
+          <div className="space-y-3">
+            {events.map((event, i) => (
+              <EventItem key={i} event={event} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -250,7 +241,7 @@ function FinishedMatchContent({ stats, events }: { stats: any; events: any[] }) 
 // Upcoming Match Content Component
 function UpcomingMatchContent({ match }: { match: Match }) {
   const ko = new Date(match.utcDate);
-  
+
   return (
     <div className="space-y-6 text-center">
       <div>
@@ -258,40 +249,33 @@ function UpcomingMatchContent({ match }: { match: Match }) {
           <ClockIcon className="w-5 h-5 text-primary" />
           Upcoming Match
         </h3>
-        
-        <div className="glass-card p-6 rounded-xl border border-border/50">
-          <div className="text-2xl font-bold mb-2">
-            Kicks off in
+
+        <div className="glass-card p-8 rounded-xl border border-border/50">
+          <div className="text-2xl font-bold mb-4">
+            Kicks off at
           </div>
           <div className="text-4xl font-bold text-primary mb-4">
             {format(ko, "HH:mm")}
           </div>
-          <div className="text-muted-foreground">
+          <div className="text-lg text-muted-foreground mb-2">
             {format(ko, "EEEE, MMMM d, yyyy")}
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {match.competition.name}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass-card p-4 rounded-xl border border-border/50">
-          <h4 className="font-semibold mb-2">Recent Form</h4>
-          <div className="flex gap-1 justify-center">
-            {["W", "W", "D", "L", "W"].map((result, i) => (
-              <div key={i} className={`w-6 h-6 rounded text-xs flex items-center justify-center font-bold ${
-                result === "W" ? "bg-success text-white" :
-                result === "D" ? "bg-warning text-white" :
-                "bg-error text-white"
-              }`}>
-                {result}
-              </div>
-            ))}
+      <div className="glass-card p-6 rounded-xl border border-border/50">
+        <h4 className="font-semibold mb-3">Match Information</h4>
+        <div className="space-y-2 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-2">
+            <MapPinIcon className="w-4 h-4" />
+            <span>Stadium: {match.homeTeam.name} Home Ground</span>
           </div>
-        </div>
-        
-        <div className="glass-card p-4 rounded-xl border border-border/50">
-          <h4 className="font-semibold mb-2">Head to Head</h4>
-          <div className="text-sm text-muted-foreground">
-            Last 5 meetings: 3W - 1D - 1L
+          <div className="flex items-center justify-center gap-2">
+            <TvIcon className="w-4 h-4" />
+            <span>Check local listings for broadcast information</span>
           </div>
         </div>
       </div>
@@ -300,40 +284,6 @@ function UpcomingMatchContent({ match }: { match: Match }) {
 }
 
 // Helper Components
-function StatBar({ label, homeValue, awayValue, unit = "" }: {
-  label: string;
-  homeValue: number;
-  awayValue: number;
-  unit?: string;
-}) {
-  const total = homeValue + awayValue;
-  const homePercentage = (homeValue / total) * 100;
-  
-  return (
-    <div className="glass-card p-4 rounded-xl border border-border/50">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-medium">{homeValue}{unit}</span>
-        <span className="text-sm font-medium text-muted-foreground">{label}</span>
-        <span className="text-sm font-medium">{awayValue}{unit}</span>
-      </div>
-      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-        <motion.div
-          className="absolute left-0 top-0 h-full bg-primary rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${homePercentage}%` }}
-          transition={{ duration: 1, delay: 0.2 }}
-        />
-        <motion.div
-          className="absolute right-0 top-0 h-full bg-secondary rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${100 - homePercentage}%` }}
-          transition={{ duration: 1, delay: 0.2 }}
-        />
-      </div>
-    </div>
-  );
-}
-
 function EventItem({ event }: { event: any }) {
   const getEventIcon = (type: string) => {
     switch (type) {

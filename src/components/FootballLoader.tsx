@@ -12,6 +12,7 @@ export default function FootballLoader({ isLoading, onComplete }: FootballLoader
   const [loadingStage, setLoadingStage] = useState(0);
   const [progress, setProgress] = useState(0);
   const [windowSize, setWindowSize] = useState({ width: 1200, height: 800 });
+  const [isMounted, setIsMounted] = useState(false);
 
   const loadingMessages = [
     "Warming up the pitch...",
@@ -22,7 +23,9 @@ export default function FootballLoader({ isLoading, onComplete }: FootballLoader
   ];
 
   useEffect(() => {
-    // Set initial window size
+    // Set mounted state and initial window size
+    setIsMounted(true);
+
     if (typeof window !== 'undefined') {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
 
@@ -60,7 +63,7 @@ export default function FootballLoader({ isLoading, onComplete }: FootballLoader
     };
   }, [isLoading, onComplete]);
 
-  if (!isLoading) return null;
+  if (!isLoading || !isMounted) return null;
 
   return (
     <AnimatePresence>
