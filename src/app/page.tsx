@@ -1,15 +1,13 @@
 "use client";
 import { LEAGUES, TOP_LEAGUE_CODES } from "@/lib/constants";
-import { getMatchesByDateRange, getTodayRange, getNextNDaysRange } from "@/lib/fd";
+import { getMatchesByDateRange, getTodayRange, getNextNDaysRange, type Match } from "@/lib/fd";
 import MatchCard from "@/components/MatchCard";
 import { useMatchModal } from "@/components/MatchModalProvider";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { MatchCardSkeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import {
-  PlayIcon,
   CalendarDaysIcon,
   TrophyIcon,
   ArrowRightIcon,
@@ -19,10 +17,10 @@ import { PlayIcon as PlaySolidIcon } from "@heroicons/react/24/solid";
 
 export default function Home() {
   const { openMatchModal } = useMatchModal();
-  const [matches, setMatches] = useState<any[]>([]);
-  const [upcoming, setUpcoming] = useState<any[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [upcoming, setUpcoming] = useState<Match[]>([]);
   const [hasApiKey, setHasApiKey] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -41,8 +39,6 @@ export default function Home() {
         setMatches([]);
         setUpcoming([]);
         setHasApiKey(false);
-      } finally {
-        setLoading(false);
       }
     };
 

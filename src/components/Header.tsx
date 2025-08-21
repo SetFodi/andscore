@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ANDSCORE_BRAND_NAME } from "@/lib/constants";
+// import { ANDSCORE_BRAND_NAME } from "@/lib/constants";
 import ThemeToggle from "./ThemeToggle";
 import LogoAndscore from "./LogoAndscore";
 import { motion } from "framer-motion";

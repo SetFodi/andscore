@@ -61,7 +61,7 @@ export default function FootballLoader({ isLoading, onComplete }: FootballLoader
       clearInterval(interval);
       clearInterval(stageInterval);
     };
-  }, [isLoading, onComplete]);
+  }, [isLoading, onComplete, loadingMessages.length]);
 
   if (!isLoading || !isMounted) return null;
 

@@ -83,8 +83,7 @@ function StarBall({ size, className }: IconProps) {
   );
 }
 
-export function LeagueIcon({ code, size = 22, color, className }: { code: LeagueCode; size?: number; color?: string; className?: string }) {
-  const style = color ? { color } : undefined;
+export function LeagueIcon({ code, size = 22, className }: { code: LeagueCode; size?: number; color?: string; className?: string }) {
   switch (code) {
     case "PL":
       return <CrownBall size={size} className={className} />;

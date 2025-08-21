@@ -14,7 +14,7 @@ import {
   CalendarDaysIcon,
   ViewColumnsIcon,
   ListBulletIcon,
-  PlayIcon as PlaySolidIcon,
+  // PlayIcon as PlaySolidIcon,
   SparklesIcon
 } from "@heroicons/react/24/outline";
 
@@ -97,7 +97,7 @@ export default function MatchesPage() {
 
   // Filter and group matches with exact-day logic and league enablement
   const filteredMatches = useMemo(() => {
-    const enabledSet = new Set(TOP_LEAGUE_CODES.filter((c) => true));
+    const enabledSet = new Set(TOP_LEAGUE_CODES.filter(() => true));
     let base = matches.filter((m) => enabledSet.has(m.competition.code as LeagueCode));
 
     // Check if selected date is different from today
@@ -129,7 +129,7 @@ export default function MatchesPage() {
       (grouped[dateKey][leagueCode] ||= []).push(match);
     });
     return grouped;
-  }, [matches, activeTab, selectedDate, favoriteLeagues, favoriteTeams]);
+  }, [matches, activeTab, selectedDate, favoriteTeams]);
 
   const toggleFavorite = (code: LeagueCode) => {
     setFavoriteLeagues(prev => {

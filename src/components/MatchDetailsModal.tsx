@@ -14,6 +14,14 @@ interface MatchDetailsModalProps {
   onClose: () => void;
 }
 
+interface MatchEvent {
+  minute: number;
+  type: string;
+  team: string;
+  player: string;
+  description: string;
+}
+
 export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetailsModalProps) {
   const { isFavoriteTeam, toggleFavoriteTeam } = useFavorites();
 
@@ -29,7 +37,7 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
       return (
         <Badge variant="live" className="px-3 py-1 text-sm font-bold animate-pulse">
           <PlaySolidIcon className="w-4 h-4 mr-2" />
-          LIVE • {Math.floor(Math.random() * 90) + 1}'
+          LIVE • {Math.floor(Math.random() * 90) + 1}&apos;
         </Badge>
       );
     }
@@ -50,9 +58,6 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
       </Badge>
     );
   };
-
-  // Basic match statistics - only show what's available from the API
-  const hasStats = match.score && (match.score.fullTime.home !== null || match.score.fullTime.away !== null);
 
   // Sample events for demonstration - in real app, this would come from match API
   const sampleEvents = isLive || isFinished ? [
@@ -136,7 +141,7 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
                     </div>
                     {isLive && (
                       <div className="text-sm text-muted-foreground">
-                        {Math.floor(Math.random() * 90) + 1}' minute
+                        {Math.floor(Math.random() * 90) + 1}&apos; minute
                       </div>
                     )}
                   </div>
@@ -210,7 +215,7 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
 }
 
 // Live Match Content Component
-function LiveMatchContent({ events }: { events: any[] }) {
+function LiveMatchContent({ events }: { events: MatchEvent[] }) {
   return (
     <div className="space-y-6">
       {/* Live Status */}
@@ -242,7 +247,7 @@ function LiveMatchContent({ events }: { events: any[] }) {
 }
 
 // Finished Match Content Component
-function FinishedMatchContent({ events }: { events: any[] }) {
+function FinishedMatchContent({ events }: { events: MatchEvent[] }) {
   return (
     <div className="space-y-6">
       {/* Final Result */}
@@ -319,7 +324,7 @@ function UpcomingMatchContent({ match }: { match: Match }) {
 }
 
 // Helper Components
-function EventItem({ event }: { event: any }) {
+function EventItem({ event }: { event: MatchEvent }) {
   const getEventIcon = (type: string) => {
     switch (type) {
       case "goal": return "⚽";
@@ -337,7 +342,7 @@ function EventItem({ event }: { event: any }) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="text-sm font-bold w-8 text-center">{event.minute}'</div>
+      <div className="text-sm font-bold w-8 text-center">{event.minute}&apos;</div>
       <div className="text-lg">{getEventIcon(event.type)}</div>
       <div className="flex-1">
         <div className="font-medium">{event.player}</div>

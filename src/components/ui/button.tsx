@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { motion } from "framer-motion";
+// import { motion } from "framer-motion";
 import { cn } from "./cn";
 
 const buttonVariants = cva(
@@ -36,30 +36,8 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, withMotion = true, children, ...props }, ref) => {
-    if (withMotion) {
-      return (
-        <motion.button
-          className={cn(buttonVariants({ variant, size, className }))}
-          ref={ref}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          {...props}
-        >
-          {/* Shimmer effect for primary buttons */}
-          {variant === "default" && (
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              initial={{ x: "-100%" }}
-              whileHover={{ x: "100%" }}
-              transition={{ duration: 0.6 }}
-            />
-          )}
-          <span className="relative z-10">{children}</span>
-        </motion.button>
-      );
-    }
+  ({ className, variant, size, children, ...props }, ref) => {
+    // Motion disabled for build compatibility
 
     return (
       <button className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>

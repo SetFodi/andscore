@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   TrophyIcon,
   ArrowRightIcon,
-  SparklesIcon,
+  // SparklesIcon,
   MapPinIcon
 } from "@heroicons/react/24/outline";
 
@@ -26,11 +26,7 @@ export default function LeaguesPage() {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
-      }
+      y: 0
     }
   };
 
@@ -70,7 +66,7 @@ export default function LeaguesPage() {
         initial="hidden"
         animate="visible"
       >
-        {LEAGUES.map((league, index) => (
+        {LEAGUES.map((league) => (
           <motion.div
             key={league.code}
             variants={cardVariants}
