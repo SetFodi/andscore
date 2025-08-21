@@ -64,7 +64,7 @@ export default function Home() {
               ) : (
                 <>
                   <SparklesIcon className="w-4 h-4 mr-2" />
-                  Demo Mode - Get API Key for Live Data
+                                        Still in Beta
                 </>
               )}
             </Badge>
@@ -201,7 +201,7 @@ export default function Home() {
             Premier League • LaLiga • Serie A • Bundesliga • Ligue 1 • Champions League
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {LEAGUES.map((league) => (
             <Link
@@ -265,7 +265,7 @@ export default function Home() {
             Built for football fans who want clean, fast access to what matters most
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gradient-from to-gradient-via mx-auto mb-4 flex items-center justify-center">
@@ -278,7 +278,7 @@ export default function Home() {
               Built with Next.js and optimized for speed. Get your scores instantly.
             </p>
           </div>
-          
+
           <div className="text-center">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gradient-via to-gradient-to mx-auto mb-4 flex items-center justify-center">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,7 +290,7 @@ export default function Home() {
               No clutter, no ads. Just beautiful, focused football data.
             </p>
           </div>
-          
+
           <div className="text-center">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gradient-to to-gradient-from mx-auto mb-4 flex items-center justify-center">
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
