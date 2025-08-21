@@ -1,10 +1,13 @@
+"use client";
 import { LEAGUES, TOP_LEAGUE_CODES } from "@/lib/constants";
 import { getMatchesByDateRange, getTodayRange, getNextNDaysRange } from "@/lib/fd";
 import MatchCard from "@/components/MatchCard";
+import { useMatchModal } from "@/components/MatchModalProvider";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { MatchCardSkeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 import {
   PlayIcon,
   CalendarDaysIcon,
@@ -14,22 +17,37 @@ import {
 } from "@heroicons/react/24/outline";
 import { PlayIcon as PlaySolidIcon } from "@heroicons/react/24/solid";
 
-export default async function Home() {
-  const { from, to } = getTodayRange(0);
-  const nx = getNextNDaysRange(7);
-  let matches: Awaited<ReturnType<typeof getMatchesByDateRange>> = [];
-  let upcoming: Awaited<ReturnType<typeof getMatchesByDateRange>> = [];
-  let hasApiKey = false;
-  
-  try {
-    matches = await getMatchesByDateRange(TOP_LEAGUE_CODES, from, to);
-    upcoming = await getMatchesByDateRange(TOP_LEAGUE_CODES, nx.from, nx.to);
-    hasApiKey = true;
-  } catch {
-    // When no API key or rate-limited, we show static content instead
-    matches = [];
-    upcoming = [];
-  }
+export default function Home() {
+  const { openMatchModal } = useMatchModal();
+  const [matches, setMatches] = useState<any[]>([]);
+  const [upcoming, setUpcoming] = useState<any[]>([]);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        const { from, to } = getTodayRange(0);
+        const nx = getNextNDaysRange(7);
+
+        const todayMatches = await getMatchesByDateRange(TOP_LEAGUE_CODES, from, to);
+        const upcomingMatches = await getMatchesByDateRange(TOP_LEAGUE_CODES, nx.from, nx.to);
+
+        setMatches(todayMatches);
+        setUpcoming(upcomingMatches);
+        setHasApiKey(true);
+      } catch {
+        // When no API key or rate-limited, we show static content instead
+        setMatches([]);
+        setUpcoming([]);
+        setHasApiKey(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMatches();
+  }, []);
 
   return (
     <div className="flex flex-col gap-12">
@@ -146,7 +164,11 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {matches.slice(0, 6).map((m) => (
-              <MatchCard key={m.id} match={m} />
+              <MatchCard
+                key={m.id}
+                match={m}
+                onClick={() => openMatchModal(m)}
+              />
             ))}
           </div>
         </section>
@@ -163,7 +185,11 @@ export default async function Home() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {upcoming.slice(0, 6).map((m) => (
-              <MatchCard key={m.id} match={m} />
+              <MatchCard
+                key={m.id}
+                match={m}
+                onClick={() => openMatchModal(m)}
+              />
             ))}
           </div>
         </section>

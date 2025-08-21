@@ -21,7 +21,7 @@ export default function Header() {
   const navigationItems = [
     {
       href: "/",
-      label: "Today",
+      label: "Home",
       icon: HomeIcon,
       description: "Today's matches"
     },

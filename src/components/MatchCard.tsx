@@ -58,7 +58,17 @@ function TeamRow({ name, crest, score, highlight = false, isWinner = false }: {
   );
 }
 
-export default function MatchCard({ match, showLeague = true, timeZone = "local" }: { match: Match; showLeague?: boolean; timeZone?: "local" | "utc" | string }) {
+export default function MatchCard({
+  match,
+  showLeague = true,
+  timeZone = "local",
+  onClick
+}: {
+  match: Match;
+  showLeague?: boolean;
+  timeZone?: "local" | "utc" | string;
+  onClick?: () => void;
+}) {
   const status = match.status;
   const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(status);
   const isFinished = ["FINISHED", "AWARDED"].includes(status);
@@ -97,12 +107,13 @@ export default function MatchCard({ match, showLeague = true, timeZone = "local"
 
   return (
     <motion.div
-      className="group match-card rounded-2xl glass-card border border-border/50 p-6 hover:shadow-xl transition-all duration-300"
+      className="group match-card rounded-2xl glass-card border border-border/50 p-6 hover:shadow-xl transition-all duration-300 cursor-pointer"
       whileHover={{
         scale: 1.02,
         transition: { duration: 0.2 }
       }}
       whileTap={{ scale: 0.98 }}
+      onClick={onClick}
     >
       {/* Header with league and status */}
       <div className="flex items-center justify-between gap-4 mb-6">

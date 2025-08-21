@@ -5,6 +5,7 @@ import MatchCard from "@/components/MatchCard";
 import FiltersBar, { type FilterTab } from "@/components/FiltersBar";
 import { Badge } from "@/components/ui/badge";
 import { MatchCardSkeleton } from "@/components/ui/skeleton";
+import { useMatchModal } from "@/components/MatchModalProvider";
 import { useEffect, useMemo, useState } from "react";
 import { format, addDays, subDays, isSameDay, isToday, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,6 +21,7 @@ type MatchType = Match;
 type ViewMode = "cards" | "list";
 
 export default function MatchesPage() {
+  const { openMatchModal } = useMatchModal();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<FilterTab>("today");
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
@@ -292,7 +294,12 @@ export default function MatchesPage() {
                           {viewMode === "cards" ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                               {leagueMatches[league.code].map(match => (
-                                <MatchCard key={match.id} match={match} showLeague={false} />
+                                <MatchCard
+                                  key={match.id}
+                                  match={match}
+                                  showLeague={false}
+                                  onClick={() => openMatchModal(match)}
+                                />
                               ))}
                             </div>
                           ) : (
