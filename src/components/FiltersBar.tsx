@@ -69,19 +69,19 @@ export default function FiltersBar({
 
   return (
     <motion.div
-      className="glass-card border border-border/50 rounded-2xl p-4 shadow-lg"
+      className="glass-card border border-border/50 rounded-2xl p-4 shadow-lg md:filters-bar-mobile"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="w-full md:w-auto">
           <ToggleGroup.Root
             type="single"
             value={activeTab}
             onValueChange={(v) => v && onTabChange(v as FilterTab)}
-            className="flex flex-wrap items-center gap-2"
+            className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center"
           >
             {filterTabs.map((tab) => {
               const IconComponent = tab.icon;
@@ -92,8 +92,9 @@ export default function FiltersBar({
                   key={tab.value}
                   value={tab.value}
                   className={`
-                    group relative overflow-hidden rounded-xl px-4 py-2.5 text-sm font-medium
-                    transition-all duration-300 ease-out
+                    group relative overflow-hidden rounded-xl px-3 py-3 text-sm font-medium
+                    transition-all duration-300 ease-out min-h-[48px] w-full
+                    md:px-4 md:py-2.5 md:w-auto md:min-h-auto
                     ${isActive
                       ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
                       : 'glass-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50'
@@ -101,9 +102,9 @@ export default function FiltersBar({
                     ${tab.variant === 'live' && isActive ? 'animate-pulse' : ''}
                   `}
                 >
-                  <div className="flex items-center gap-2 relative z-10">
+                  <div className="flex items-center justify-center gap-2 relative z-10 md:justify-start">
                     <IconComponent className={`w-4 h-4 ${tab.variant === 'live' && isActive ? 'text-white' : ''}`} />
-                    <span>{tab.label}</span>
+                    <span className="text-xs md:text-sm">{tab.label}</span>
                   </div>
 
                   {/* Hover effect */}
@@ -129,25 +130,28 @@ export default function FiltersBar({
         </div>
 
         {/* Enhanced Date Picker */}
-        <div className="flex items-center gap-3">
-          <Badge variant="outline" className="text-xs font-medium">
-            Filter by Date
-          </Badge>
+        <div className="w-full md:w-auto">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+            <Badge variant="outline" className="text-xs font-medium self-start md:self-auto">
+              Filter by Date
+            </Badge>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <motion.button
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass-card border border-border/50 text-sm font-medium hover:border-primary/50 transition-all duration-300 group"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <CalendarIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                <span className="font-semibold">{displayDate}</span>
-                <ChevronDownIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-all duration-300 group-hover:rotate-180" />
-              </motion.button>
-            </PopoverTrigger>
+            <Popover>
+              <PopoverTrigger asChild>
+                <motion.button
+                  className="flex items-center justify-between gap-2 px-4 py-3 rounded-xl glass-card border border-border/50 text-sm font-medium hover:border-primary/50 transition-all duration-300 group w-full md:w-auto md:py-2.5"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span className="font-semibold">{displayDate}</span>
+                  </div>
+                  <ChevronDownIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-all duration-300 group-hover:rotate-180" />
+                </motion.button>
+              </PopoverTrigger>
 
-            <PopoverContent align="end" className="w-96 p-4">
+            <PopoverContent align="end" className="w-96 p-4 md:w-96 max-w-[calc(100vw-32px)]">
               <div className="space-y-4">
                 {/* Quick Date Selection */}
                 <div>
@@ -159,7 +163,7 @@ export default function FiltersBar({
                         <motion.button
                           key={q.label}
                           onClick={() => onDateChange(q.date)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          className={`px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] ${
                             isSelected
                               ? "bg-primary text-primary-foreground shadow-md"
                               : "glass-card border border-border/50 hover:border-primary/50 hover:bg-primary/5"
@@ -214,6 +218,7 @@ export default function FiltersBar({
               </div>
             </PopoverContent>
           </Popover>
+          </div>
         </div>
       </div>
     </motion.div>

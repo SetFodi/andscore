@@ -55,21 +55,32 @@ export default function MatchesPage() {
     setLoading(true);
     let fromDate: string, toDate: string;
 
-    switch (activeTab) {
-      case "live":
-      case "today": {
-        // Fetch a full 24h window to be safe with provider date boundaries
-        fromDate = format(selectedDate, "yyyy-MM-dd");
-        toDate = format(addDays(selectedDate, 1), "yyyy-MM-dd");
-        break;
+    // Check if selected date is different from today
+    const isSelectedDateToday = isSameDay(selectedDate, new Date());
+
+    if (!isSelectedDateToday) {
+      // If a specific date is selected, fetch matches around that date
+      fromDate = format(subDays(selectedDate, 3), "yyyy-MM-dd");
+      toDate = format(addDays(selectedDate, 3), "yyyy-MM-dd");
+    } else {
+      // Use original logic for today's date
+      switch (activeTab) {
+        case "live":
+        case "today": {
+          // Fetch a full 24h window to be safe with provider date boundaries
+          fromDate = format(selectedDate, "yyyy-MM-dd");
+          toDate = format(addDays(selectedDate, 1), "yyyy-MM-dd");
+          break;
+        }
+        case "upcoming":
+          fromDate = format(selectedDate, "yyyy-MM-dd");
+          toDate = format(addDays(selectedDate, 7), "yyyy-MM-dd");
+          break;
+        default:
+          // For "all" matches, fetch a wider range around the selected date
+          fromDate = format(subDays(selectedDate, 7), "yyyy-MM-dd");
+          toDate = format(addDays(selectedDate, 7), "yyyy-MM-dd");
       }
-      case "upcoming":
-        fromDate = format(selectedDate, "yyyy-MM-dd");
-        toDate = format(addDays(selectedDate, 7), "yyyy-MM-dd");
-        break;
-      default:
-        fromDate = format(subDays(selectedDate, 1), "yyyy-MM-dd");
-        toDate = format(addDays(selectedDate, 7), "yyyy-MM-dd");
     }
 
     fetchMatches(fromDate, toDate)
@@ -83,21 +94,23 @@ export default function MatchesPage() {
     const enabledSet = new Set(TOP_LEAGUE_CODES.filter((c) => true));
     let base = matches.filter((m) => enabledSet.has(m.competition.code as LeagueCode));
 
+    // Check if selected date is different from today
+    const isSelectedDateToday = isSameDay(selectedDate, new Date());
+
     if (activeTab === "live") {
       base = base.filter((m) => ["IN_PLAY", "PAUSED", "LIVE"].includes(m.status));
-    }
-    if (activeTab === "today") {
+    } else if (activeTab === "today" || !isSelectedDateToday) {
+      // If "today" tab OR a specific date is selected, show matches for that date
       const start = startOfDay(selectedDate);
       const end = endOfDay(selectedDate);
       base = base.filter((m) => isWithinInterval(new Date(m.utcDate), { start, end }));
-    }
-    if (activeTab === "upcoming") {
+    } else if (activeTab === "upcoming") {
       const start = startOfDay(selectedDate);
       base = base.filter((m) => new Date(m.utcDate) >= start);
-    }
-    if (activeTab === "favorites") {
+    } else if (activeTab === "favorites") {
       base = base.filter((m) => favoriteLeagues.includes(m.competition.code as LeagueCode));
     }
+    // For "all" tab with today's date, show all matches in the fetched range
 
     const grouped: Record<string, Record<LeagueCode, MatchType[]>> = {};
     base.forEach((match) => {
@@ -132,24 +145,24 @@ export default function MatchesPage() {
     <div className="min-h-screen">
       {/* Enhanced Header */}
       <motion.div
-        className="sticky top-16 z-40 backdrop-blur-xl glass-card border-b border-border/50"
+        className="glass-card border-b border-border/50 mb-6"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <Badge variant="success" className="px-3 py-1 text-sm font-semibold">
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:mb-6">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+              <Badge variant="success" className="px-3 py-1 text-sm font-semibold self-start">
                 <CalendarDaysIcon className="w-4 h-4 mr-2" />
                 Fixtures & Results
               </Badge>
-              <h1 className="text-3xl sm:text-4xl font-bold gradient-text">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold gradient-text">
                 Football Fixtures
               </h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 self-start md:self-auto">
               <Badge variant="outline" className="text-xs">
                 {Object.values(filteredMatches).reduce((acc, leagues) =>
                   acc + Object.values(leagues).reduce((sum, matches) => sum + matches.length, 0), 0

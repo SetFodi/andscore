@@ -350,6 +350,95 @@ body {
     padding: 1rem;
   }
 
+  /* Mobile filter tabs */
+  .filter-tabs-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .filter-tab-mobile {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    padding: 12px 8px;
+    font-size: 13px;
+    text-align: center;
+    border-radius: 12px;
+  }
+
+  /* Mobile date picker */
+  .date-picker-mobile {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* Mobile match cards */
+  .match-card-mobile {
+    margin-bottom: 12px;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  /* Mobile grid improvements */
+  .mobile-match-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Mobile list view improvements */
+  .mobile-list-item {
+    padding: 12px 16px;
+    margin-bottom: 8px;
+  }
+
+  /* Mobile header adjustments */
+  .mobile-header {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-header h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  /* Mobile filters bar */
+  .filters-bar-mobile {
+    padding: 16px;
+    margin: 0 -16px 16px -16px;
+    border-radius: 0;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Mobile page container */
+  .mobile-page-container {
+    padding: 0 16px;
+  }
+
+  /* Mobile sticky header adjustments */
+  .mobile-sticky-header {
+    top: 60px; /* Account for mobile header height */
+    margin: 0 -16px;
+    border-radius: 0;
+  }
+
+  /* Mobile content spacing */
+  .mobile-content {
+    margin-top: 16px;
+    gap: 16px;
+  }
+
+  /* Mobile popover adjustments */
+  .mobile-popover {
+    width: calc(100vw - 32px);
+    max-width: none;
+  }
+
   /* Mobile-friendly animations */
   @media (prefers-reduced-motion: reduce) {
     *,
