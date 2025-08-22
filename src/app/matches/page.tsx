@@ -221,7 +221,7 @@ export default function MatchesPage() {
                   <button
                     key={tab.value}
                     onClick={() => {
-                      setActiveTab(tab.value as any);
+                      setActiveTab(tab.value as FilterTab);
                       if (tab.value === "today") setSelectedDate(new Date());
                     }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-300 ${
