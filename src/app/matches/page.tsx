@@ -205,6 +205,55 @@ export default function MatchesPage() {
 
       {/* Main Content with Sidebar Layout */}
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Mobile Filters - Compact horizontal layout */}
+        <div className="lg:hidden w-full mb-6">
+          <div className="space-y-4">
+            {/* Filter Tabs - Horizontal scroll on mobile */}
+            <div className="overflow-x-auto">
+              <div className="flex gap-2 pb-2 min-w-max">
+                {[
+                  { value: "all", label: "All Matches", icon: "🌐" },
+                  { value: "live", label: "Live", icon: "🔴" },
+                  { value: "today", label: "Today", icon: "📅" },
+                  { value: "upcoming", label: "Upcoming", icon: "⏰" },
+                  { value: "favorites", label: `Favorites${favoriteTeams.length > 0 ? ` (${favoriteTeams.length})` : ''}`, icon: "⭐" }
+                ].map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => {
+                      setActiveTab(tab.value as any);
+                      if (tab.value === "today") setSelectedDate(new Date());
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                      activeTab === tab.value
+                        ? 'bg-primary text-primary-foreground shadow-lg'
+                        : 'glass-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/50'
+                    }`}
+                  >
+                    <span>{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Date Picker - Compact */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Date:</span>
+              <button
+                onClick={() => setSelectedDate(new Date())}
+                className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-300 ${
+                  isSameDay(selectedDate, new Date())
+                    ? 'bg-primary text-primary-foreground'
+                    : 'glass-card border border-border/50 hover:border-primary/50'
+                }`}
+              >
+                {format(selectedDate, "MMM d, yyyy")}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="flex gap-6">
           {/* Sidebar */}
           <motion.div
@@ -236,26 +285,6 @@ export default function MatchesPage() {
               />
             </div>
           </motion.div>
-
-          {/* Mobile Filters - Show on smaller screens */}
-          <div className="lg:hidden w-full mb-6">
-            <FiltersBar
-              activeTab={activeTab}
-              onTabChange={(t) => {
-                setActiveTab(t);
-                if (t === "today") setSelectedDate(new Date());
-              }}
-              selectedDate={selectedDate}
-              onDateChange={(d) => {
-                setSelectedDate(d);
-                if (activeTab === "today" && !isSameDay(d, new Date())) {
-                  setActiveTab("all");
-                }
-              }}
-              quickDates={quickDateButtons}
-              isSidebar={false}
-            />
-          </div>
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
