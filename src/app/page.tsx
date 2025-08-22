@@ -3,6 +3,7 @@ import { LEAGUES, TOP_LEAGUE_CODES } from "@/lib/constants";
 import type { Match } from "@/lib/fd";
 import MatchCard from "@/components/MatchCard";
 import { useMatchModal } from "@/components/MatchModalProvider";
+import LiveTicker from "@/components/LiveTicker";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -130,6 +131,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Live Ticker */}
+      <LiveTicker className="-mt-4" />
 
       {/* Today's Matches Section */}
       {matches.length > 0 && (

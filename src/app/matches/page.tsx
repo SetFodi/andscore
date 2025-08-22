@@ -6,6 +6,7 @@ import FiltersBar, { type FilterTab } from "@/components/FiltersBar";
 import { Badge } from "@/components/ui/badge";
 import { MatchCardSkeleton } from "@/components/ui/skeleton";
 import { useMatchModal } from "@/components/MatchModalProvider";
+import LiveTicker from "@/components/LiveTicker";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useEffect, useMemo, useState } from "react";
 import { format, addDays, subDays, isSameDay, isToday, startOfDay, endOfDay, isWithinInterval } from "date-fns";
@@ -205,6 +206,12 @@ export default function MatchesPage() {
 
       {/* Main Content with Sidebar Layout */}
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Live Ticker */}
+        <LiveTicker
+          className="mb-6"
+          leagues={favoriteLeagues.length ? favoriteLeagues : TOP_LEAGUE_CODES}
+          refreshMs={20000}
+        />
         {/* Mobile Filters - Compact horizontal layout */}
         <div className="lg:hidden w-full mb-6">
           <div className="space-y-4">
