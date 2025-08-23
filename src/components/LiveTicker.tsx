@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMatchModal } from "@/components/MatchModalProvider";
 import type { Match } from "@/lib/fd";
 import { TOP_LEAGUE_CODES, type LeagueCode } from "@/lib/constants";
+import { getLiveMinute } from "@/lib/fd";
 
 function isLive(status: string) {
   return ["IN_PLAY", "PAUSED", "LIVE"].includes(status);
@@ -81,6 +82,15 @@ export default function LiveTicker({
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
               </span>
               <span className="text-xs font-semibold text-red-500">LIVE</span>
+              {(() => {
+                const min = getLiveMinute(m);
+                return min ? (
+                  <>
+                    <span className="text-xs text-muted-foreground">•</span>
+                    <span className="text-xs font-semibold">{min}</span>
+                  </>
+                ) : null;
+              })()}
               <span className="text-xs text-muted-foreground">•</span>
               <span className="text-sm font-medium truncate max-w-[14ch]">{m.homeTeam.name}</span>
               <span className="text-xs text-muted-foreground">•</span>

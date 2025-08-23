@@ -5,6 +5,7 @@ import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useFavorites } from "@/hooks/useFavorites";
+import { LEAGUES, type LeagueCode } from "@/lib/constants";
 import {
   CalendarIcon,
   GlobeAltIcon,
@@ -13,13 +14,14 @@ import {
   ChevronDownIcon,
   ViewColumnsIcon,
   ListBulletIcon,
+  FunnelIcon
 } from "@heroicons/react/24/outline";
 import {
   PlayIcon as PlaySolidIcon,
   StarIcon as StarSolidIcon
 } from "@heroicons/react/24/solid";
 
-export type FilterTab = "all" | "live" | "today" | "upcoming" | "favorites";
+export type FilterTab = "finished" | "live" | "today" | "upcoming" | "favorites";
 
 export default function FiltersBar({
   activeTab,
@@ -29,7 +31,9 @@ export default function FiltersBar({
   quickDates,
   isSidebar = false,
   viewMode,
-  onViewModeChange
+  onViewModeChange,
+  selectedLeague,
+  onLeagueChange
 }: {
   activeTab: FilterTab;
   onTabChange: (t: FilterTab) => void;
@@ -39,16 +43,18 @@ export default function FiltersBar({
   isSidebar?: boolean;
   viewMode?: "cards" | "list";
   onViewModeChange?: (mode: "cards" | "list") => void;
+  selectedLeague?: LeagueCode | null;
+  onLeagueChange?: (league: LeagueCode | null) => void;
 }) {
   const { favoriteTeams } = useFavorites();
   const displayDate = format(selectedDate, "PP");
 
   const filterTabs = [
     {
-      value: "all",
-      label: "All Matches",
+      value: "finished",
+      label: "Finished",
       icon: GlobeAltIcon,
-      description: "View all matches"
+      description: "View finished matches from the past week"
     },
     {
       value: "live",
@@ -252,6 +258,67 @@ export default function FiltersBar({
             </PopoverContent>
           </Popover>
           </div>
+
+          {/* League Filter */}
+          {selectedLeague !== undefined && onLeagueChange && (
+            <div className={isSidebar ? "space-y-3" : "w-full md:w-auto"}>
+              {isSidebar && (
+                <h4 className="text-md font-semibold text-foreground">League Filter</h4>
+              )}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <motion.button
+                    className={`group w-full flex items-center justify-between px-4 py-3 rounded-xl glass-card border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 ${
+                      isSidebar ? "" : "md:w-auto md:min-w-[200px]"
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <FunnelIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <span className="font-semibold">
+                        {selectedLeague ? LEAGUES.find(l => l.code === selectedLeague)?.name || "League" : "All Leagues"}
+                      </span>
+                    </div>
+                    <ChevronDownIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-all duration-300 group-hover:rotate-180" />
+                  </motion.button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0">
+                  <div className="p-4">
+                    <h4 className="font-semibold mb-3">Select League</h4>
+                    <div className="space-y-1">
+                      <button
+                        onClick={() => onLeagueChange(null)}
+                        className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                          selectedLeague === null
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                        }`}
+                      >
+                        All Leagues
+                      </button>
+                      {LEAGUES.map((league) => (
+                        <button
+                          key={league.code}
+                          onClick={() => onLeagueChange(league.code as LeagueCode)}
+                          className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                            selectedLeague === league.code
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{league.name}</span>
+                            <span className="text-xs opacity-70">({league.country})</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
 
           {/* View Mode Toggle - Only in sidebar */}
           {isSidebar && viewMode && onViewModeChange && (

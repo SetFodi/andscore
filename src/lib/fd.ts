@@ -1,4 +1,4 @@
-import { FD_BASE_URL, type LeagueCode } from "@/lib/constants";
+import { FD_BASE_URL, LEAGUES, type LeagueCode } from "@/lib/constants";
 
 type FetchOptions = {
   next?: RequestInit["next"];
@@ -98,3 +98,21 @@ export function getNextNDaysRange(n: number) {
   const dateTo = end.toISOString().slice(0, 10);
   return { from: dateFrom, to: dateTo };
 }
+
+export const TOP_LEAGUE_CODES: LeagueCode[] = LEAGUES.map((l) => l.code);
+
+export function getLiveMinute(match: Match): string | null {
+  if (!match.minute) return null;
+
+  const minute = parseInt(match.minute, 10);
+  if (isNaN(minute)) return match.minute;
+
+  // Add some visual indicators for different match phases
+  if (minute <= 45) return `${minute}'`;
+  if (minute <= 90) return `${minute}'`;
+  if (minute > 90) return `${minute}'+`;
+
+  return `${minute}'`;
+}
+
+

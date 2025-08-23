@@ -1,9 +1,8 @@
 "use client";
 import { LEAGUES, TOP_LEAGUE_CODES } from "@/lib/constants";
-import type { Match } from "@/lib/fd";
+import { getMatchesByDateRange, getTodayRange, getNextNDaysRange, type Match } from "@/lib/fd";
 import MatchCard from "@/components/MatchCard";
 import { useMatchModal } from "@/components/MatchModalProvider";
-import LiveTicker from "@/components/LiveTicker";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -24,35 +23,14 @@ export default function Home() {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        // Compute date ranges locally to keep API key server-side via proxy
-        const today = new Date();
-        const todayStr = today.toISOString().slice(0, 10);
+        const { from, to } = getTodayRange(0);
+        const nx = getNextNDaysRange(7);
 
-        const end = new Date();
-        end.setDate(end.getDate() + 7);
-        const upcomingFrom = today.toISOString().slice(0, 10);
-        const upcomingTo = end.toISOString().slice(0, 10);
+        const todayMatches = await getMatchesByDateRange(TOP_LEAGUE_CODES, from, to);
+        const upcomingMatches = await getMatchesByDateRange(TOP_LEAGUE_CODES, nx.from, nx.to);
 
-        // Fetch today's matches
-        const qToday = new URLSearchParams({
-          competitions: TOP_LEAGUE_CODES.join(","),
-          dateFrom: todayStr,
-          dateTo: todayStr,
-        });
-        const resToday = await fetch(`/api/fd/matches?${qToday.toString()}`, { cache: "no-store" });
-        const dataToday = resToday.ok ? await resToday.json() : { matches: [] };
-
-        // Fetch upcoming matches (next 7 days)
-        const qUpcoming = new URLSearchParams({
-          competitions: TOP_LEAGUE_CODES.join(","),
-          dateFrom: upcomingFrom,
-          dateTo: upcomingTo,
-        });
-        const resUpcoming = await fetch(`/api/fd/matches?${qUpcoming.toString()}`, { cache: "no-store" });
-        const dataUpcoming = resUpcoming.ok ? await resUpcoming.json() : { matches: [] };
-
-        setMatches((dataToday.matches || []) as Match[]);
-        setUpcoming((dataUpcoming.matches || []) as Match[]);
+        setMatches(todayMatches);
+        setUpcoming(upcomingMatches);
       } catch {
         // When no API key or rate-limited, we show static content instead
         setMatches([]);
@@ -131,9 +109,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Live Ticker */}
-      <LiveTicker className="-mt-4" />
 
       {/* Today's Matches Section */}
       {matches.length > 0 && (

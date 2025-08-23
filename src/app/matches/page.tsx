@@ -6,7 +6,6 @@ import FiltersBar, { type FilterTab } from "@/components/FiltersBar";
 import { Badge } from "@/components/ui/badge";
 import { MatchCardSkeleton } from "@/components/ui/skeleton";
 import { useMatchModal } from "@/components/MatchModalProvider";
-import LiveTicker from "@/components/LiveTicker";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useEffect, useMemo, useState } from "react";
 import { format, addDays, subDays, isSameDay, isToday, startOfDay, endOfDay, isWithinInterval } from "date-fns";
@@ -28,6 +27,7 @@ export default function MatchesPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<FilterTab>("today");
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
+  const [selectedLeague, setSelectedLeague] = useState<LeagueCode | null>(null);
   const [favoriteLeagues, setFavoriteLeagues] = useState<LeagueCode[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -83,8 +83,13 @@ export default function MatchesPage() {
           fromDate = format(selectedDate, "yyyy-MM-dd");
           toDate = format(addDays(selectedDate, 7), "yyyy-MM-dd");
           break;
+        case "finished":
+          // For finished matches, fetch from past week to today
+          fromDate = format(subDays(selectedDate, 7), "yyyy-MM-dd");
+          toDate = format(selectedDate, "yyyy-MM-dd");
+          break;
         default:
-          // For "all" matches, fetch a wider range around the selected date
+          // For other cases, fetch a wider range around the selected date
           fromDate = format(subDays(selectedDate, 7), "yyyy-MM-dd");
           toDate = format(addDays(selectedDate, 7), "yyyy-MM-dd");
       }
@@ -94,12 +99,17 @@ export default function MatchesPage() {
       .then((m) => setMatches(m))
       .catch(() => setMatches([]))
       .finally(() => setLoading(false));
-  }, [activeTab, selectedDate]);
+  }, [activeTab, selectedDate, selectedLeague]);
 
   // Filter and group matches with exact-day logic and league enablement
   const filteredMatches = useMemo(() => {
     const enabledSet = new Set(TOP_LEAGUE_CODES.filter(() => true));
     let base = matches.filter((m) => enabledSet.has(m.competition.code as LeagueCode));
+
+    // Apply league filter if selected
+    if (selectedLeague) {
+      base = base.filter((m) => m.competition.code === selectedLeague);
+    }
 
     // Check if selected date is different from today
     const isSelectedDateToday = isSameDay(selectedDate, new Date());
@@ -114,13 +124,19 @@ export default function MatchesPage() {
     } else if (activeTab === "upcoming") {
       const start = startOfDay(selectedDate);
       base = base.filter((m) => new Date(m.utcDate) >= start);
+    } else if (activeTab === "finished") {
+      // Show finished matches from the past week
+      base = base.filter((m) => ["FINISHED", "AWARDED"].includes(m.status));
+      const weekAgo = startOfDay(subDays(selectedDate, 7));
+      const today = endOfDay(selectedDate);
+      base = base.filter((m) => isWithinInterval(new Date(m.utcDate), { start: weekAgo, end: today }));
     } else if (activeTab === "favorites") {
       const favoriteTeamIds = new Set(favoriteTeams.map(t => t.id));
       base = base.filter((m) =>
         favoriteTeamIds.has(m.homeTeam.id) || favoriteTeamIds.has(m.awayTeam.id)
       );
     }
-    // For "all" tab with today's date, show all matches in the fetched range
+    // For other cases, show all matches in the fetched range
 
     const grouped: Record<string, Record<LeagueCode, MatchType[]>> = {};
     base.forEach((match) => {
@@ -130,7 +146,7 @@ export default function MatchesPage() {
       (grouped[dateKey][leagueCode] ||= []).push(match);
     });
     return grouped;
-  }, [matches, activeTab, selectedDate, favoriteTeams]);
+  }, [matches, activeTab, selectedDate, favoriteTeams, selectedLeague]);
 
   const toggleFavorite = (code: LeagueCode) => {
     setFavoriteLeagues(prev => {
@@ -206,12 +222,6 @@ export default function MatchesPage() {
 
       {/* Main Content with Sidebar Layout */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Live Ticker */}
-        <LiveTicker
-          className="mb-6"
-          leagues={favoriteLeagues.length ? favoriteLeagues : TOP_LEAGUE_CODES}
-          refreshMs={20000}
-        />
         {/* Mobile Filters - Compact horizontal layout */}
         <div className="lg:hidden w-full mb-6">
           <div className="space-y-4">
@@ -219,7 +229,7 @@ export default function MatchesPage() {
             <div className="overflow-x-auto">
               <div className="flex gap-2 pb-2 min-w-max">
                 {[
-                  { value: "all", label: "All Matches", icon: "🌐" },
+                  { value: "finished", label: "Finished", icon: "🏁" },
                   { value: "live", label: "Live", icon: "🔴" },
                   { value: "today", label: "Today", icon: "📅" },
                   { value: "upcoming", label: "Upcoming", icon: "⏰" },
@@ -281,14 +291,16 @@ export default function MatchesPage() {
                 onDateChange={(d) => {
                   setSelectedDate(d);
                   if (activeTab === "today" && !isSameDay(d, new Date())) {
-                    // If user picks a different day, switch to "all" to avoid the logical mismatch
-                    setActiveTab("all");
+                    // If user picks a different day, switch to "finished" to avoid the logical mismatch
+                    setActiveTab("finished");
                   }
                 }}
                 quickDates={quickDateButtons}
                 isSidebar={true}
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}
+                selectedLeague={selectedLeague}
+                onLeagueChange={setSelectedLeague}
               />
             </div>
           </motion.div>
