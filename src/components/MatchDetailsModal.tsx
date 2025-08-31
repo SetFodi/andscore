@@ -1,11 +1,13 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { XMarkIcon, ClockIcon, MapPinIcon, TvIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
+import { XMarkIcon, ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { PlayIcon as PlaySolidIcon, CheckCircleIcon, HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import { Badge } from "./ui/badge";
 import { TeamAvatar } from "./ui/avatar";
 import { useFavorites } from "@/hooks/useFavorites";
 import type { Match } from "@/lib/fd";
+import { getLiveMinute } from "@/lib/fd";
 import { format } from "date-fns";
 
 interface MatchDetailsModalProps {
@@ -14,30 +16,60 @@ interface MatchDetailsModalProps {
   onClose: () => void;
 }
 
-interface MatchEvent {
-  minute: number;
-  type: string;
-  team: string;
-  player: string;
-  description: string;
-}
-
 export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetailsModalProps) {
   const { isFavoriteTeam, toggleFavoriteTeam } = useFavorites();
+
+  type AFEvent = {
+    minute: string | null;
+    type: "goal";
+    team: "home" | "away" | null;
+    player: string | null;
+    assist: string | null;
+    detail: string | null;
+  };
+
+  const [events, setEvents] = useState<AFEvent[] | null>(null);
+  const [eventsLoading, setEventsLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadEvents() {
+      if (!isOpen || !match) return;
+      try {
+        setEventsLoading(true);
+        const q = new URLSearchParams({
+          comp: String(match.competition.code),
+          utcDate: match.utcDate,
+          home: match.homeTeam.name,
+          away: match.awayTeam.name,
+        });
+        const res = await fetch(`/api/af/events?${q.toString()}`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`events ${res.status}`);
+        const data = await res.json();
+        if (!cancelled) setEvents(Array.isArray(data?.events) ? (data.events as AFEvent[]) : []);
+      } catch {
+        if (!cancelled) setEvents([]);
+      } finally {
+        if (!cancelled) setEventsLoading(false);
+      }
+    }
+    loadEvents();
+    return () => { cancelled = true; };
+  }, [isOpen, match]);
 
   if (!match) return null;
 
   const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status);
   const isFinished = ["FINISHED", "AWARDED"].includes(match.status);
-  const isUpcoming = ["SCHEDULED", "TIMED"].includes(match.status);
   const ko = new Date(match.utcDate);
 
   const getStatusBadge = () => {
     if (isLive) {
+      const min = getLiveMinute(match);
       return (
         <Badge variant="live" className="px-3 py-1 text-sm font-bold animate-pulse">
           <PlaySolidIcon className="w-4 h-4 mr-2" />
-          LIVE • {Math.floor(Math.random() * 90) + 1}&apos;
+          {min ? `LIVE • ${min}` : "LIVE"}
         </Badge>
       );
     }
@@ -59,11 +91,7 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
     );
   };
 
-  // Sample events for demonstration - in real app, this would come from match API
-  const sampleEvents = isLive || isFinished ? [
-    { minute: 23, type: "goal", team: "home", player: "Goal scored", description: "Match event" },
-    { minute: 67, type: "goal", team: "away", player: "Goal scored", description: "Match event" }
-  ] : [];
+
 
   return (
     <AnimatePresence>
@@ -139,11 +167,6 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
                     <div className="text-4xl font-bold mb-2">
                       {match.score.fullTime.home ?? "-"} - {match.score.fullTime.away ?? "-"}
                     </div>
-                    {isLive && (
-                      <div className="text-sm text-muted-foreground">
-                        {Math.floor(Math.random() * 90) + 1}&apos; minute
-                      </div>
-                    )}
                   </div>
 
                   <div className="flex items-center gap-4">
@@ -181,29 +204,54 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
                     <ClockIcon className="w-4 h-4" />
                     {format(ko, "EEEE, MMMM d, yyyy • HH:mm")}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MapPinIcon className="w-4 h-4" />
-                    {match.homeTeam.name} Stadium
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <TvIcon className="w-4 h-4" />
-                    Live on TV
-                  </div>
                 </div>
               </div>
 
-              {/* Content */}
+              {/* Events: Only render if real data exists */}
               <div className="p-6 overflow-y-auto max-h-[60vh]">
-                {isLive && (
-                  <LiveMatchContent events={sampleEvents} />
+                {eventsLoading ? (
+                  <div className="text-center text-sm text-muted-foreground">Loading events…</div>
+                ) : null}
+
+                {!eventsLoading && events && events.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold">Goals</h3>
+                    <div className="space-y-2">
+                      {events.map((e, i) => {
+                        const teamName = e.team === "home" ? match.homeTeam.name : e.team === "away" ? match.awayTeam.name : "";
+                        return (
+                          <motion.div
+                            key={`${e.minute}-${e.player}-${i}`}
+                            className="flex items-center gap-3 p-3 glass-card rounded-lg border border-border/50"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                          >
+                            <span className="w-10 text-center tabular-nums text-sm font-semibold">{e.minute ?? ""}</span>
+                            <span className="text-lg">⚽</span>
+                            <div className="flex-1 text-sm">
+                              <div className="font-medium truncate">
+                                {teamName}{e.player ? ` • ${e.player}` : ""}
+                              </div>
+                              {(e.assist || e.detail) && (
+                                <div className="text-xs text-muted-foreground truncate">
+                                  {[
+                                    e.assist ? `Assist: ${e.assist}` : null,
+                                    e.detail || null,
+                                  ].filter(Boolean).join(" • ")}
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
 
-                {isFinished && (
-                  <FinishedMatchContent events={sampleEvents} />
-                )}
-
-                {isUpcoming && (
-                  <UpcomingMatchContent match={match} />
+                {!eventsLoading && Array.isArray(events) && events.length === 0 && (
+                  <div className="text-center text-sm text-muted-foreground">
+                    No goal events available.
+                  </div>
                 )}
               </div>
             </div>
@@ -211,143 +259,5 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
         </>
       )}
     </AnimatePresence>
-  );
-}
-
-// Live Match Content Component
-function LiveMatchContent({ events }: { events: MatchEvent[] }) {
-  return (
-    <div className="space-y-6">
-      {/* Live Status */}
-      <div className="text-center">
-        <div className="glass-card p-6 rounded-xl border border-border/50">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <PlaySolidIcon className="w-5 h-5 text-live animate-pulse" />
-            <h3 className="text-lg font-semibold text-live">Match in Progress</h3>
-          </div>
-          <p className="text-muted-foreground">
-            Follow the live action as it happens
-          </p>
-        </div>
-      </div>
-
-      {/* Live Events */}
-      {events.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Recent Events</h3>
-          <div className="space-y-3">
-            {events.map((event, i) => (
-              <EventItem key={i} event={event} />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Finished Match Content Component
-function FinishedMatchContent({ events }: { events: MatchEvent[] }) {
-  return (
-    <div className="space-y-6">
-      {/* Final Result */}
-      <div className="text-center">
-        <div className="glass-card p-6 rounded-xl border border-border/50">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <CheckCircleIcon className="w-5 h-5 text-success" />
-            <h3 className="text-lg font-semibold text-success">Match Completed</h3>
-          </div>
-          <p className="text-muted-foreground">
-            Final result and match summary
-          </p>
-        </div>
-      </div>
-
-      {/* Match Events */}
-      {events.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Key Events</h3>
-          <div className="space-y-3">
-            {events.map((event, i) => (
-              <EventItem key={i} event={event} />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Upcoming Match Content Component
-function UpcomingMatchContent({ match }: { match: Match }) {
-  const ko = new Date(match.utcDate);
-
-  return (
-    <div className="space-y-6 text-center">
-      <div>
-        <h3 className="text-lg font-semibold mb-4 flex items-center justify-center gap-2">
-          <ClockIcon className="w-5 h-5 text-primary" />
-          Upcoming Match
-        </h3>
-
-        <div className="glass-card p-8 rounded-xl border border-border/50">
-          <div className="text-2xl font-bold mb-4">
-            Kicks off at
-          </div>
-          <div className="text-4xl font-bold text-primary mb-4">
-            {format(ko, "HH:mm")}
-          </div>
-          <div className="text-lg text-muted-foreground mb-2">
-            {format(ko, "EEEE, MMMM d, yyyy")}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {match.competition.name}
-          </div>
-        </div>
-      </div>
-
-      <div className="glass-card p-6 rounded-xl border border-border/50">
-        <h4 className="font-semibold mb-3">Match Information</h4>
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <div className="flex items-center justify-center gap-2">
-            <MapPinIcon className="w-4 h-4" />
-            <span>Stadium: {match.homeTeam.name} Home Ground</span>
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <TvIcon className="w-4 h-4" />
-            <span>Check local listings for broadcast information</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Helper Components
-function EventItem({ event }: { event: MatchEvent }) {
-  const getEventIcon = (type: string) => {
-    switch (type) {
-      case "goal": return "⚽";
-      case "yellow": return "🟨";
-      case "red": return "🟥";
-      case "substitution": return "🔄";
-      default: return "📝";
-    }
-  };
-
-  return (
-    <motion.div
-      className="flex items-center gap-4 p-3 glass-card rounded-lg border border-border/50"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="text-sm font-bold w-8 text-center">{event.minute}&apos;</div>
-      <div className="text-lg">{getEventIcon(event.type)}</div>
-      <div className="flex-1">
-        <div className="font-medium">{event.player}</div>
-        <div className="text-sm text-muted-foreground">{event.description}</div>
-      </div>
-    </motion.div>
   );
 }

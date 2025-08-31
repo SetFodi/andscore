@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { TeamAvatar } from "@/components/ui/avatar";
 import type { LeagueCode } from "@/lib/constants";
 import type { Match } from "@/lib/fd";
+import { getLiveMinute } from "@/lib/fd";
 import { motion } from "framer-motion";
 import {
   PlayIcon as PlaySolidIcon,
@@ -79,7 +80,10 @@ export default function MatchCard({
       return (
         <Badge variant="live" className="px-3 py-1 text-xs font-bold">
           <PlaySolidIcon className="w-3 h-3 mr-1" />
-          LIVE
+          {(() => {
+            const min = getLiveMinute(match);
+            return min ? `LIVE • ${min}` : "LIVE";
+          })()}
         </Badge>
       );
     }
