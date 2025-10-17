@@ -14,7 +14,7 @@ import { MatchLoadingState } from "@/components/ui/loading";
 
 export default function MatchesPageNew() {
   const { openMatchModal } = useMatchModal();
-  const { favoriteTeams, toggleFavoriteTeam } = useFavorites();
+  const { favoriteTeams, toggleFavorite } = useFavorites();
   
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<CompactFilterTab>("today");
@@ -237,9 +237,9 @@ export default function MatchesPageNew() {
                                     // Toggle first team found
                                     const teamToToggle = favoriteTeams.find(t => t.id === match.homeTeam.id || t.id === match.awayTeam.id);
                                     if (teamToToggle) {
-                                      toggleFavoriteTeam(teamToToggle);
+                                      toggleFavorite(teamToToggle);
                                     } else {
-                                      toggleFavoriteTeam(match.homeTeam);
+                                      toggleFavorite(match.homeTeam);
                                     }
                                   }}
                                 />

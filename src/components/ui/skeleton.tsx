@@ -74,3 +74,19 @@ function StandingsRowSkeleton() {
 }
 
 export { Skeleton, MatchCardSkeleton, LeagueCardSkeleton, StandingsRowSkeleton };
+
+export function MatchListRowSkeleton() {
+  return (
+    <div className="glass-card rounded-xl p-4 border border-border/50">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-4 w-10" />
+          <Skeleton className="h-4 w-36" />
+          <span className="text-muted-foreground">vs</span>
+          <Skeleton className="h-4 w-36" />
+        </div>
+        <Skeleton className="h-5 w-14" />
+      </div>
+    </div>
+  );
+}

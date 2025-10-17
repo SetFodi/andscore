@@ -1,53 +1,40 @@
 "use client";
 import { motion } from "framer-motion";
-import { cn } from "./cn";
 
-// Football spinning animation
-export function FootballSpinner({ className, size = "md" }: { 
-  className?: string; 
-  size?: "sm" | "md" | "lg" 
-}) {
+export function LoadingSpinner({ size = "md", className = "" }: { size?: "sm" | "md" | "lg"; className?: string }) {
   const sizeClasses = {
-    sm: "w-6 h-6",
-    md: "w-8 h-8", 
+    sm: "w-4 h-4",
+    md: "w-8 h-8",
     lg: "w-12 h-12"
   };
 
   return (
-    <motion.div
-      className={cn("relative", sizeClasses[size], className)}
-      animate={{ rotate: 360 }}
-      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-    >
-      <div className="w-full h-full rounded-full bg-gradient-to-br from-primary to-primary-hover shadow-lg">
-        {/* Football pattern */}
-        <div className="absolute inset-0 rounded-full">
-          <div className="absolute top-1/2 left-1/2 w-1/3 h-px bg-white transform -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-px h-1/3 bg-white transform -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-white rounded-full" />
-          <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-white rounded-full" />
-        </div>
-      </div>
-    </motion.div>
+    <div className={`relative ${sizeClasses[size]} ${className}`}>
+      <motion.div
+        className="absolute inset-0 rounded-full border-2 border-primary/20"
+        style={{ borderTopColor: "currentColor" }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+      />
+    </div>
   );
 }
 
-// Pulsing dots loader
-export function PulsingDots({ className }: { className?: string }) {
+export function LoadingDots({ className = "" }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div className={`flex items-center gap-1 ${className}`}>
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
-          className="w-2 h-2 bg-primary rounded-full"
+          className="w-2 h-2 rounded-full bg-current"
           animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.7, 1, 0.7]
+            opacity: [0.5, 1, 0.5]
           }}
           transition={{
             duration: 1,
             repeat: Infinity,
-            delay: i * 0.2
+            delay: i * 0.15
           }}
         />
       ))}
@@ -55,132 +42,78 @@ export function PulsingDots({ className }: { className?: string }) {
   );
 }
 
-// Field loading animation
-export function FieldLoader({ className }: { className?: string }) {
+export function LoadingPulse({ className = "" }: { className?: string }) {
   return (
-    <div className={cn("relative w-32 h-20 mx-auto", className)}>
-      {/* Field background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-field-primary to-field-secondary rounded-lg overflow-hidden">
-        {/* Field lines */}
-        <div className="absolute inset-2 border border-field-lines/30 rounded">
-          <div className="absolute top-1/2 left-0 right-0 h-px bg-field-lines/30 transform -translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 w-8 h-8 border border-field-lines/30 rounded-full transform -translate-x-1/2 -translate-y-1/2" />
-        </div>
-        
-        {/* Animated ball */}
-        <motion.div
-          className="absolute w-3 h-3 bg-white rounded-full shadow-lg"
-          animate={{
-            x: [8, 120, 8],
-            y: [8, 44, 8]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
-    </div>
+    <motion.div
+      className={`inline-block ${className}`}
+      animate={{
+        opacity: [0.5, 1, 0.5]
+      }}
+      transition={{
+        duration: 1.5,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    >
+      Loading...
+    </motion.div>
   );
 }
 
-// Loading overlay
-export function LoadingOverlay({ 
-  isLoading, 
-  children, 
-  loadingText = "Loading...",
-  className 
-}: {
-  isLoading: boolean;
-  children: React.ReactNode;
-  loadingText?: string;
-  className?: string;
-}) {
-  return (
-    <div className={cn("relative", className)}>
-      {children}
-      
-      {isLoading && (
-        <motion.div
-          className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <div className="text-center">
-            <FootballSpinner className="mx-auto mb-4" />
-            <p className="text-sm font-medium text-muted-foreground">{loadingText}</p>
-          </div>
-        </motion.div>
-      )}
-    </div>
-  );
-}
-
-// Progress bar with football theme
-export function FootballProgress({ 
-  value, 
-  max = 100, 
-  className 
-}: { 
-  value: number; 
-  max?: number; 
-  className?: string; 
-}) {
-  const percentage = (value / max) * 100;
-  
-  return (
-    <div className={cn("relative w-full h-2 bg-muted rounded-full overflow-hidden", className)}>
-      <motion.div
-        className="h-full bg-gradient-to-r from-primary to-primary-hover rounded-full relative"
-        initial={{ width: 0 }}
-        animate={{ width: `${percentage}%` }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        {/* Moving highlight */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-          animate={{ x: ["-100%", "100%"] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-        />
-      </motion.div>
-    </div>
-  );
-}
-
-// Skeleton with football theme
-export function FootballSkeleton({ 
-  className,
-  variant = "default"
-}: { 
-  className?: string;
-  variant?: "default" | "match" | "league" | "standing";
-}) {
-  const baseClasses = "animate-pulse bg-gradient-to-r from-muted/50 via-muted/80 to-muted/50 rounded-lg";
-  
-  if (variant === "match") {
+export function MatchLoadingState({ viewMode = "cards" }: { viewMode?: "cards" | "list" }) {
+  if (viewMode === "list") {
     return (
-      <div className={cn("glass-card p-6 rounded-2xl border border-border/50", className)}>
-        <div className="flex items-center justify-between mb-4">
-          <div className={cn(baseClasses, "h-4 w-20")} />
-          <div className={cn(baseClasses, "h-6 w-16 rounded-full")} />
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className={cn(baseClasses, "h-10 w-10 rounded-full")} />
-            <div className={cn(baseClasses, "h-5 flex-1")} />
-            <div className={cn(baseClasses, "h-6 w-8")} />
-          </div>
-          <div className="flex items-center gap-3">
-            <div className={cn(baseClasses, "h-10 w-10 rounded-full")} />
-            <div className={cn(baseClasses, "h-5 flex-1")} />
-            <div className={cn(baseClasses, "h-6 w-8")} />
-          </div>
-        </div>
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="glass-card rounded-xl p-4 border border-border/30"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-4 bg-muted/50 rounded animate-pulse" />
+              <div className="flex-1 h-4 bg-muted/50 rounded animate-pulse" />
+              <div className="w-16 h-6 bg-muted/50 rounded animate-pulse" />
+            </div>
+          </motion.div>
+        ))}
       </div>
     );
   }
-  
-  return <div className={cn(baseClasses, className)} />;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="glass-card rounded-2xl p-6 border border-border/30"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: i * 0.05 }}
+        >
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="w-20 h-4 bg-muted/50 rounded animate-pulse" />
+              <div className="w-16 h-4 bg-muted/50 rounded animate-pulse" />
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-muted/50 animate-pulse" />
+                <div className="flex-1 h-4 bg-muted/50 rounded animate-pulse" />
+                <div className="w-8 h-6 bg-muted/50 rounded animate-pulse" />
+              </div>
+              <div className="h-px bg-border/30" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-muted/50 animate-pulse" />
+                <div className="flex-1 h-4 bg-muted/50 rounded animate-pulse" />
+                <div className="w-8 h-6 bg-muted/50 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
 }

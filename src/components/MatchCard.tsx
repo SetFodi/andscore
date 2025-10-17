@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { TeamAvatar } from "@/components/ui/avatar";
 import type { LeagueCode } from "@/lib/constants";
 import type { Match } from "@/lib/fd";
-import { getLiveMinute } from "@/lib/fd";
+import { getLiveMinute, getDisplayedScore, formatKickoffDate, formatKickoffTime } from "@/lib/fd";
+import { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   PlayIcon as PlaySolidIcon,
@@ -59,7 +60,7 @@ function TeamRow({ name, crest, score, highlight = false, isWinner = false }: {
   );
 }
 
-export default function MatchCard({
+function MatchCardCmp({
   match,
   showLeague = true,
   timeZone = "local",
@@ -73,7 +74,7 @@ export default function MatchCard({
   const status = match.status;
   const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(status);
   const isFinished = ["FINISHED", "AWARDED"].includes(status);
-  const ko = new Date(match.utcDate);
+  const ko = useMemo(() => new Date(match.utcDate), [match.utcDate]);
 
   const getStatusBadge = () => {
     if (isLive) {
@@ -100,27 +101,26 @@ export default function MatchCard({
     return (
       <Badge variant="outline" className="px-3 py-1 text-xs font-medium">
         <ClockIcon className="w-3 h-3 mr-1" />
-        {ko.toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          timeZone: timeZone === "local" ? undefined : timeZone === "utc" ? "UTC" : timeZone,
-        })}
+        {formatKickoffTime(match.utcDate, timeZone)}
       </Badge>
     );
   };
 
   return (
     <motion.div
-      className="group match-card rounded-2xl glass-card border border-border/50 p-6 hover:shadow-xl transition-all duration-300 cursor-pointer"
+      className="group match-card rounded-2xl glass-card border border-border/50 p-6 hover:shadow-2xl hover:border-primary/30 transition-all duration-300 cursor-pointer relative overflow-hidden"
       whileHover={{
         scale: 1.02,
+        y: -4,
         transition: { duration: 0.2 }
       }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
     >
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       {/* Header with league and status */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <div className="relative flex items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           {showLeague && <LeagueBadge code={match.competition.code as LeagueCode} />}
         </div>
@@ -128,14 +128,19 @@ export default function MatchCard({
       </div>
 
       {/* Match Details */}
-      <div className="space-y-3">
-        <TeamRow
-          name={match.homeTeam.name}
-          crest={match.homeTeam.crest}
-          score={match.score.fullTime.home}
-          highlight={match.score.winner === "HOME_TEAM"}
-          isWinner={match.score.winner === "HOME_TEAM" && isFinished}
-        />
+      <div className="relative space-y-3">
+        {(() => {
+          const s = getDisplayedScore(match);
+          return (
+            <TeamRow
+              name={match.homeTeam.name}
+              crest={match.homeTeam.crest}
+              score={typeof s.home === "number" ? s.home : null}
+              highlight={match.score.winner === "HOME_TEAM"}
+              isWinner={match.score.winner === "HOME_TEAM" && isFinished}
+            />
+          );
+        })()}
 
         {/* VS Divider */}
         <div className="flex items-center justify-center py-2">
@@ -148,36 +153,37 @@ export default function MatchCard({
           </div>
         </div>
 
-        <TeamRow
-          name={match.awayTeam.name}
-          crest={match.awayTeam.crest}
-          score={match.score.fullTime.away}
-          highlight={match.score.winner === "AWAY_TEAM"}
-          isWinner={match.score.winner === "AWAY_TEAM" && isFinished}
-        />
+        {(() => {
+          const s = getDisplayedScore(match);
+          return (
+            <TeamRow
+              name={match.awayTeam.name}
+              crest={match.awayTeam.crest}
+              score={typeof s.away === "number" ? s.away : null}
+              highlight={match.score.winner === "AWAY_TEAM"}
+              isWinner={match.score.winner === "AWAY_TEAM" && isFinished}
+            />
+          );
+        })()}
       </div>
 
       {/* Match Date/Time Footer */}
-      <div className="mt-4 pt-4 border-t border-border/50">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {ko.toLocaleDateString([], {
-              weekday: "short",
-              month: "short",
-              day: "numeric"
-            })}
+      <div className="relative mt-4 pt-4 border-t border-border/30 group-hover:border-border/50 transition-colors">
+        <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+          <span className="flex items-center gap-1.5">
+            <ClockIcon className="w-3.5 h-3.5 opacity-70" />
+            {formatKickoffDate(match.utcDate, { weekday: "short", month: "short", day: "numeric" })}
           </span>
-          <span>
-            {ko.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              timeZone: timeZone === "local" ? undefined : timeZone === "utc" ? "UTC" : timeZone,
-            })}
+          <span className="tabular-nums">
+            {formatKickoffTime(match.utcDate, timeZone)}
           </span>
         </div>
       </div>
     </motion.div>
   );
 }
+
+const MatchCard = memo(MatchCardCmp);
+export default MatchCard;
 
 

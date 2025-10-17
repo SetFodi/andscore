@@ -5,13 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { useMatchModal } from "@/components/MatchModalProvider";
 import type { Match } from "@/lib/fd";
 import { TOP_LEAGUE_CODES, type LeagueCode } from "@/lib/constants";
-import { getLiveMinute } from "@/lib/fd";
+import { getLiveMinute, getDisplayedScore } from "@/lib/fd";
 
 function isLive(status: string) {
   return ["IN_PLAY", "PAUSED", "LIVE"].includes(status);
 }
 
-export default function LiveTicker({
+import { memo } from "react";
+
+function LiveTickerCmp({
   leagues = TOP_LEAGUE_CODES,
   className,
   refreshMs = 30000,
@@ -64,8 +66,9 @@ export default function LiveTicker({
 
       <div className="flex gap-3 overflow-x-auto no-scrollbar px-2" role="list" aria-label="Live matches">
         {matches.map((m) => {
-          const homeScore = m.score.fullTime.home ?? "-";
-          const awayScore = m.score.fullTime.away ?? "-";
+          const s = getDisplayedScore(m);
+          const homeScore = s.home;
+          const awayScore = s.away;
           const aria = `Open match details: ${m.homeTeam.name} ${homeScore}-${awayScore} ${m.awayTeam.name}`;
           return (
             <motion.button
@@ -147,3 +150,6 @@ export default function LiveTicker({
     </AnimatePresence>
   );
 }
+
+const LiveTicker = memo(LiveTickerCmp);
+export default LiveTicker;

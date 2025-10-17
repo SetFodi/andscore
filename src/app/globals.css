@@ -503,6 +503,15 @@ body {
   100% { transform: translateX(calc(100vw + 4rem)) rotate(720deg); opacity: 0.9; }
 }
 
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Loading kick animation */
 .kick-scene { position: relative; width: 320px; height: 120px; }
 .kick-player { position: absolute; left: 0; bottom: 0; width: 32px; height: 32px; border-radius: 6px; background: linear-gradient(135deg, var(--gradient-from), var(--gradient-via)); box-shadow: 0 8px 24px rgba(0,0,0,.25); animation: player-run 1.2s ease-in-out infinite; }

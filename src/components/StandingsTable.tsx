@@ -1,6 +1,7 @@
 import type { StandingTable } from "@/lib/fd";
+import { memo } from "react";
 
-export default function StandingsTable({ table }: { table: StandingTable[] }) {
+function StandingsTable({ table }: { table: StandingTable[] }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border/50 glass-card">
       <table className="w-full text-sm">
@@ -55,5 +56,7 @@ export default function StandingsTable({ table }: { table: StandingTable[] }) {
     </div>
   );
 }
+
+export default memo(StandingsTable);
 
 

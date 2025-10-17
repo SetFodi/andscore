@@ -101,18 +101,103 @@ export function getNextNDaysRange(n: number) {
 
 export const TOP_LEAGUE_CODES: LeagueCode[] = LEAGUES.map((l) => l.code);
 
+// Best-effort approximation when provider does not supply a minute.
+// Handles first half, half-time pause, second half, and stoppage time.
+function computeApproxMinute(status: string, utcDate: string): string | null {
+  const kickoff = new Date(utcDate);
+  if (Number.isNaN(kickoff.getTime())) return null;
+
+  const now = new Date();
+  const elapsedMs = now.getTime() - kickoff.getTime();
+  if (elapsedMs < 0) return null; // not started yet
+
+  const elapsedMin = Math.floor(elapsedMs / 60000);
+
+  // If game is paused around half-time window, show HT
+  if (status === "PAUSED") {
+    if (elapsedMin >= 45 && elapsedMin <= 65) return "HT";
+    // Other pauses (cooling break, VAR) – display last known minute approximation
+  }
+
+  if (status === "IN_PLAY" || status === "LIVE") {
+    // Account for a typical half-time break ~15 min. If we've passed ~60 min since KO,
+    // subtract 15 to approximate second-half clock.
+    if (elapsedMin <= 45) return `${elapsedMin}'`;
+    if (elapsedMin <= 60) return "45+'"; // stoppage + short into break window
+    const secondHalf = elapsedMin - 15; // subtract half-time
+    if (secondHalf <= 90) return `${secondHalf}'`;
+    return `90+'`;
+  }
+
+  return null;
+}
+
 export function getLiveMinute(match: Match): string | null {
-  if (!match.minute) return null;
+  // Prefer provider minute if present
+  if (match.minute) {
+    // Normalize common textual statuses
+    const lower = match.minute.toLowerCase();
+    if (lower.includes("ht")) return "HT";
 
-  const minute = parseInt(match.minute, 10);
-  if (isNaN(minute)) return match.minute;
+    const minute = parseInt(match.minute, 10);
+    if (!Number.isNaN(minute)) {
+      if (minute <= 45) return `${minute}'`;
+      if (minute <= 90) return `${minute}'`;
+      if (minute > 90) return `90+'`;
+    }
+    return match.minute;
+  }
 
-  // Add some visual indicators for different match phases
-  if (minute <= 45) return `${minute}'`;
-  if (minute <= 90) return `${minute}'`;
-  if (minute > 90) return `${minute}'+`;
+  // Derive when not supplied by provider
+  const derived = computeApproxMinute(match.status, match.utcDate);
+  return derived;
+}
 
-  return `${minute}'`;
+export function getDisplayedScore(match: Match): { home: number | string; away: number | string } {
+  const candidates: Array<{ home: number | null; away: number | null } | undefined> = [
+    match.score?.fullTime,
+    match.score?.halfTime,
+  ];
+
+  for (const c of candidates) {
+    if (!c) continue;
+    const home = c.home;
+    const away = c.away;
+    if (typeof home === "number" && typeof away === "number") {
+      return { home, away };
+    }
+  }
+
+  // If live and one side available, fallback to showing numbers or '-'
+  const ft = match.score?.fullTime;
+  if (ft) {
+    return {
+      home: typeof ft.home === "number" ? ft.home : "-",
+      away: typeof ft.away === "number" ? ft.away : "-",
+    };
+  }
+
+  return { home: "-", away: "-" };
+}
+
+export function formatKickoffTime(utcIso: string, timeZone: "local" | "utc" | string = "local"): string {
+  const ko = new Date(utcIso);
+  const tz = timeZone === "local" ? undefined : timeZone === "utc" ? "UTC" : timeZone;
+  try {
+    return ko.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: tz });
+  } catch {
+    // Fallback in rare TZ errors
+    return ko.toISOString().slice(11, 16);
+  }
+}
+
+export function formatKickoffDate(utcIso: string, localeOpts?: Intl.DateTimeFormatOptions): string {
+  const ko = new Date(utcIso);
+  try {
+    return ko.toLocaleDateString([], localeOpts ?? { weekday: "short", month: "short", day: "numeric" });
+  } catch {
+    return ko.toISOString().slice(0, 10);
+  }
 }
 
 
