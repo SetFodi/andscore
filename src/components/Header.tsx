@@ -48,15 +48,16 @@ export default function Header() {
 
   return (
     <motion.header
-      className="sticky top-0 z-50 glass-card border-b border-border/50 backdrop-blur-xl"
+      className="sticky top-0 z-50 glass-card border-b border-border/30 backdrop-blur-xl shadow-sm"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.3 }}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Logo with gradient accent */}
           <motion.div
+            className="relative"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
@@ -64,35 +65,32 @@ export default function Header() {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
-            <nav className="flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-2">
+            <nav className="flex items-center gap-1 bg-muted/30 rounded-xl p-1">
               {navigationItems.map((item) => {
                 const IconComponent = item.icon;
+                const isActive = typeof window !== 'undefined' && window.location.pathname === item.href;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
-                    className="group relative flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-300"
+                    className={`group relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    }`}
                   >
-                    <IconComponent className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    <IconComponent className={`w-4 h-4 ${isActive ? "" : "group-hover:text-primary"} transition-colors`} />
                     <span>{item.label}</span>
-
-                    {/* Hover effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-primary/10 rounded-lg"
-                      initial={{ scale: 0, opacity: 0 }}
-                      whileHover={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.2 }}
-                    />
                   </Link>
                 );
               })}
             </nav>
 
-            <div className="flex items-center gap-3">
-              <Badge variant="league" className="text-xs">
-                Live Scores
+            <div className="flex items-center gap-3 ml-4">
+              <Badge variant="live" className="text-xs font-bold px-3 py-1.5 animate-pulse">
+                🔴 LIVE
               </Badge>
               <ThemeToggle />
             </div>

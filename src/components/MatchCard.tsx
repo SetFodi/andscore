@@ -74,7 +74,6 @@ function MatchCardCmp({
   const status = match.status;
   const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(status);
   const isFinished = ["FINISHED", "AWARDED"].includes(status);
-  const ko = useMemo(() => new Date(match.utcDate), [match.utcDate]);
 
   const getStatusBadge = () => {
     if (isLive) {

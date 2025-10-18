@@ -52,6 +52,7 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
         {/* Home Team */}
         <div className="flex items-center justify-between gap-2 mb-1">
           <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={match.homeTeam.crest}
               alt=""
@@ -72,6 +73,7 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
         {/* Away Team */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={match.awayTeam.crest}
               alt=""

@@ -58,7 +58,7 @@ export default function LeaguesPage() {
           </h1>
 
           <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Follow Europe's elite competitions with
+            Follow Europe&apos;s elite competitions with
             <br className="hidden sm:block" />
             <span className="text-primary font-bold">live standings, fixtures & real-time results</span>
           </p>

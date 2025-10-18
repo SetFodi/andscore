@@ -60,25 +60,89 @@ export function LoadingPulse({ className = "" }: { className?: string }) {
   );
 }
 
+export function FootballLoadingAnimation() {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 gap-6">
+      {/* Animated Football */}
+      <div className="relative">
+        <motion.div
+          className="w-16 h-16 rounded-full bg-gradient-to-br from-white to-gray-200 shadow-2xl relative overflow-hidden"
+          animate={{
+            rotate: 360,
+            scale: [1, 1.1, 1]
+          }}
+          transition={{
+            rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+            scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+          }}
+        >
+          {/* Pentagon pattern */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-gray-800 transform rotate-45" />
+          </div>
+          {/* Stitching circles */}
+          {[0, 72, 144, 216, 288].map((angle, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-gray-800 rounded-full"
+              style={{
+                top: '50%',
+                left: '50%',
+                transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-20px)`
+              }}
+            />
+          ))}
+        </motion.div>
+        
+        {/* Bounce shadow */}
+        <motion.div
+          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-2 bg-black/20 rounded-full blur-sm"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.15, 0.3]
+          }}
+          transition={{
+            duration: 1,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      </div>
+
+      {/* Loading text */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-muted-foreground">Loading matches</span>
+        <LoadingDots />
+      </div>
+
+      {/* Field lines decoration */}
+      <div className="w-48 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+    </div>
+  );
+}
+
 export function MatchLoadingState({ viewMode = "cards" }: { viewMode?: "cards" | "list" }) {
   if (viewMode === "list") {
     return (
-      <div className="space-y-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="glass-card rounded-xl p-4 border border-border/30"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-4 bg-muted/50 rounded animate-pulse" />
-              <div className="flex-1 h-4 bg-muted/50 rounded animate-pulse" />
-              <div className="w-16 h-6 bg-muted/50 rounded animate-pulse" />
-            </div>
-          </motion.div>
-        ))}
+      <div className="space-y-6">
+        <FootballLoadingAnimation />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="glass-card rounded-xl p-4 border border-border/30"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-4 bg-muted/50 rounded animate-pulse" />
+                <div className="flex-1 h-4 bg-muted/50 rounded animate-pulse" />
+                <div className="w-16 h-6 bg-muted/50 rounded animate-pulse" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     );
   }

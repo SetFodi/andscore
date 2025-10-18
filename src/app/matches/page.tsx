@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { format, addDays, subDays, startOfDay, endOfDay, isWithinInterval, isToday } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { LEAGUES, TOP_LEAGUE_CODES, type LeagueCode } from "@/lib/constants";
 import type { Match } from "@/lib/fd";
 import { useMatchModal } from "@/components/MatchModalProvider";
@@ -27,22 +28,25 @@ export default function MatchesPageNew() {
     setLoading(true);
     
     const fetchRange = () => {
-      const today = format(selectedDate, "yyyy-MM-dd");
-      const tomorrow = format(addDays(selectedDate, 1), "yyyy-MM-dd");
+      const selectedDay = format(selectedDate, "yyyy-MM-dd");
+      const dayAfter = format(addDays(selectedDate, 1), "yyyy-MM-dd");
+      const dayBefore = format(subDays(selectedDate, 1), "yyyy-MM-dd");
       
       switch (activeTab) {
         case "live":
         case "today":
         case "all":
-          return { from: today, to: tomorrow };
+          // For any specific day, fetch surrounding dates to catch timezone edge cases
+          return { from: dayBefore, to: dayAfter };
         case "upcoming":
-          return { from: today, to: format(addDays(selectedDate, 14), "yyyy-MM-dd") };
+          return { from: selectedDay, to: format(addDays(selectedDate, 14), "yyyy-MM-dd") };
         case "finished":
-          return { from: format(subDays(selectedDate, 7), "yyyy-MM-dd"), to: tomorrow };
+          // Fetch wider range for finished to show past matches
+          return { from: format(subDays(selectedDate, 10), "yyyy-MM-dd"), to: dayAfter };
         case "favorites":
-          return { from: format(subDays(selectedDate, 3), "yyyy-MM-dd"), to: format(addDays(selectedDate, 21), "yyyy-MM-dd") };
+          return { from: format(subDays(selectedDate, 7), "yyyy-MM-dd"), to: format(addDays(selectedDate, 14), "yyyy-MM-dd") };
         default:
-          return { from: today, to: tomorrow };
+          return { from: selectedDay, to: dayAfter };
       }
     };
 
@@ -201,7 +205,7 @@ export default function MatchesPageNew() {
                             className="flex items-center gap-3 px-4 py-3 border-b border-border/30"
                             style={{ backgroundColor: `${league.accent}10` }}
                           >
-                            <img
+                            <Image
                               src={
                                 league.code === "PL" ? "/premier-league-1.svg" :
                                 league.code === "PD" ? "/LaLiga_logo_2023.svg.png" :
@@ -211,6 +215,8 @@ export default function MatchesPageNew() {
                                 "/UEFA_Champions_League.svg.png"
                               }
                               alt={league.name}
+                              width={20}
+                              height={20}
                               className="w-5 h-5 object-contain"
                             />
                             <h3 className="font-bold text-sm" style={{ color: league.accent }}>

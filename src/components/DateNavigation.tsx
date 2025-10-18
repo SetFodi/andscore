@@ -11,6 +11,13 @@ interface DateNavigationProps {
 }
 
 function DateNavigationCmp({ selectedDate, onDateChange, className = "" }: DateNavigationProps) {
+  const today = new Date();
+  const minDate = subDays(today, 7);
+  const maxDate = addDays(today, 7);
+  
+  const canGoPrevious = selectedDate > minDate;
+  const canGoNext = selectedDate < maxDate;
+  
   const dates = [];
   for (let i = -3; i <= 3; i++) {
     dates.push(addDays(selectedDate, i));
@@ -20,9 +27,12 @@ function DateNavigationCmp({ selectedDate, onDateChange, className = "" }: DateN
     <div className={`flex items-center gap-2 ${className}`}>
       {/* Previous Day */}
       <button
-        onClick={() => onDateChange(subDays(selectedDate, 1))}
-        className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+        onClick={() => canGoPrevious && onDateChange(subDays(selectedDate, 1))}
+        className={`p-2 rounded-lg transition-colors shrink-0 ${
+          canGoPrevious ? "hover:bg-muted" : "opacity-30 cursor-not-allowed"
+        }`}
         aria-label="Previous day"
+        disabled={!canGoPrevious}
       >
         <ChevronLeftIcon className="w-5 h-5" />
       </button>
@@ -73,9 +83,12 @@ function DateNavigationCmp({ selectedDate, onDateChange, className = "" }: DateN
 
       {/* Next Day */}
       <button
-        onClick={() => onDateChange(addDays(selectedDate, 1))}
-        className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+        onClick={() => canGoNext && onDateChange(addDays(selectedDate, 1))}
+        className={`p-2 rounded-lg transition-colors shrink-0 ${
+          canGoNext ? "hover:bg-muted" : "opacity-30 cursor-not-allowed"
+        }`}
         aria-label="Next day"
+        disabled={!canGoNext}
       >
         <ChevronRightIcon className="w-5 h-5" />
       </button>
