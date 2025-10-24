@@ -29,10 +29,16 @@ export const metadata: Metadata = {
   title: "andscore — football, beautifully simple",
   description: "Live scores, fixtures and standings for the top leagues and the Champions League.",
   metadataBase: new URL("https://example.com"),
+  icons: {
+    icon: "/football.svg",
+    shortcut: "/football.svg",
+    apple: "/football.png",
+  },
   openGraph: {
     title: "andscore",
     description: "Live scores for the top 5 leagues + UCL",
     type: "website",
+    images: ["/football.png"],
   },
   applicationName: ANDSCORE_BRAND_NAME,
 };

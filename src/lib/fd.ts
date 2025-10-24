@@ -154,27 +154,30 @@ export function getLiveMinute(match: Match): string | null {
 }
 
 export function getDisplayedScore(match: Match): { home: number | string; away: number | string } {
-  const candidates: Array<{ home: number | null; away: number | null } | undefined> = [
-    match.score?.fullTime,
-    match.score?.halfTime,
-  ];
-
-  for (const c of candidates) {
-    if (!c) continue;
-    const home = c.home;
-    const away = c.away;
-    if (typeof home === "number" && typeof away === "number") {
-      return { home, away };
-    }
+  // First, try fullTime scores (most reliable for finished matches)
+  const ft = match.score?.fullTime;
+  if (ft && (typeof ft.home === "number" || typeof ft.away === "number")) {
+    return {
+      home: typeof ft.home === "number" ? ft.home : (ft.home === 0 ? 0 : "-"),
+      away: typeof ft.away === "number" ? ft.away : (ft.away === 0 ? 0 : "-"),
+    };
   }
 
-  // If live and one side available, fallback to showing numbers or '-'
-  const ft = match.score?.fullTime;
-  if (ft) {
+  // Fallback to halfTime if available (for matches in progress)
+  const ht = match.score?.halfTime;
+  if (ht && (typeof ht.home === "number" || typeof ht.away === "number")) {
     return {
-      home: typeof ft.home === "number" ? ft.home : "-",
-      away: typeof ft.away === "number" ? ft.away : "-",
+      home: typeof ht.home === "number" ? ht.home : (ht.home === 0 ? 0 : "-"),
+      away: typeof ht.away === "number" ? ht.away : (ht.away === 0 ? 0 : "-"),
     };
+  }
+
+  // Log for debugging if no scores found for finished matches
+  if (["FINISHED", "AWARDED"].includes(match.status)) {
+    console.warn(`No scores found for finished match: ${match.homeTeam.name} vs ${match.awayTeam.name}`, {
+      status: match.status,
+      score: match.score
+    });
   }
 
   return { home: "-", away: "-" };

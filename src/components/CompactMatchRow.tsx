@@ -1,5 +1,5 @@
 "use client";
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import type { Match } from "@/lib/fd";
 import { getLiveMinute, getDisplayedScore, formatKickoffTime } from "@/lib/fd";
 import { motion } from "framer-motion";
@@ -14,13 +14,31 @@ interface CompactMatchRowProps {
 }
 
 function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: CompactMatchRowProps) {
+  const [mounted, setMounted] = useState(false);
+  
+  // Prevent hydration mismatch by only showing dynamic content after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
   const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status);
   const isFinished = ["FINISHED", "AWARDED"].includes(match.status);
-  const scores = getDisplayedScore(match);
-  const homeScore = typeof scores.home === "number" ? scores.home : "-";
-  const awayScore = typeof scores.away === "number" ? scores.away : "-";
   const homeWinner = match.score.winner === "HOME_TEAM";
   const awayWinner = match.score.winner === "AWAY_TEAM";
+  
+  // Calculate scores only after mount to prevent hydration mismatch
+  const getScores = () => {
+    if (!mounted) {
+      return { home: "-", away: "-" };
+    }
+    const scores = getDisplayedScore(match);
+    return {
+      home: typeof scores.home === "number" ? scores.home : "-",
+      away: typeof scores.away === "number" ? scores.away : "-"
+    };
+  };
+  
+  const { home: displayHomeScore, away: displayAwayScore } = getScores();
 
   return (
     <motion.div
@@ -28,6 +46,7 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
       onClick={onClick}
       whileHover={{ x: 2 }}
       transition={{ duration: 0.15 }}
+      suppressHydrationWarning
     >
       {/* Time / Status */}
       <div className="w-16 shrink-0 text-center">
@@ -63,10 +82,13 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
               {match.homeTeam.name}
             </span>
           </div>
-          <span className={`text-sm font-bold tabular-nums w-6 text-right ${
-            homeWinner ? "text-primary" : ""
-          }`}>
-            {homeScore}
+          <span 
+            className={`text-sm font-bold tabular-nums w-6 text-right ${
+              homeWinner ? "text-primary" : ""
+            }`}
+            suppressHydrationWarning
+          >
+            {displayHomeScore}
           </span>
         </div>
 
@@ -84,10 +106,13 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
               {match.awayTeam.name}
             </span>
           </div>
-          <span className={`text-sm font-bold tabular-nums w-6 text-right ${
-            awayWinner ? "text-primary" : ""
-          }`}>
-            {awayScore}
+          <span 
+            className={`text-sm font-bold tabular-nums w-6 text-right ${
+              awayWinner ? "text-primary" : ""
+            }`}
+            suppressHydrationWarning
+          >
+            {displayAwayScore}
           </span>
         </div>
       </div>

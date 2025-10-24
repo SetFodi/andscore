@@ -57,9 +57,32 @@ export default function MatchesPageNew() {
       dateTo: to,
     });
 
-    fetch(`/api/fd/matches?${qs.toString()}`, { cache: "no-store" })
+    fetch(`/api/fd/matches?${qs.toString()}`, { 
+      cache: "no-store",
+      // Force fresh data
+      headers: { "Cache-Control": "no-cache" }
+    })
       .then((res) => res.json())
-      .then((data) => setMatches(data.matches || []))
+      .then((data) => {
+        const matches = data.matches || [];
+        
+        // Debug: Log league distribution
+        const byLeague = matches.reduce((acc: Record<string, number>, m: Match) => {
+          acc[m.competition.code] = (acc[m.competition.code] || 0) + 1;
+          return acc;
+        }, {});
+        console.log("📊 Matches by league:", byLeague);
+        
+        // Log any finished matches without scores for debugging
+        const noScores = matches.filter((m: Match) => 
+          ["FINISHED", "AWARDED"].includes(m.status) && 
+          (!m.score?.fullTime?.home && m.score?.fullTime?.home !== 0)
+        );
+        if (noScores.length > 0) {
+          console.warn("Matches missing scores:", noScores.length);
+        }
+        setMatches(matches);
+      })
       .catch(() => setMatches([]))
       .finally(() => setLoading(false));
   }, [activeTab, selectedDate]);

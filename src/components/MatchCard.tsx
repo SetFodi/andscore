@@ -5,7 +5,7 @@ import { TeamAvatar } from "@/components/ui/avatar";
 import type { LeagueCode } from "@/lib/constants";
 import type { Match } from "@/lib/fd";
 import { getLiveMinute, getDisplayedScore, formatKickoffDate, formatKickoffTime } from "@/lib/fd";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { motion } from "framer-motion";
 import {
   PlayIcon as PlaySolidIcon,

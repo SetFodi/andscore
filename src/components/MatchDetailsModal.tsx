@@ -1,6 +1,5 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
 import { XMarkIcon, ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { PlayIcon as PlaySolidIcon, CheckCircleIcon, HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import { Badge } from "./ui/badge";
@@ -19,48 +18,11 @@ interface MatchDetailsModalProps {
 export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetailsModalProps) {
   const { isFavoriteTeam, toggleFavoriteTeam } = useFavorites();
 
-  type AFEvent = {
-    minute: string | null;
-    type: "goal";
-    team: "home" | "away" | null;
-    player: string | null;
-    assist: string | null;
-    detail: string | null;
-  };
-
-  const [events, setEvents] = useState<AFEvent[] | null>(null);
-  const [eventsLoading, setEventsLoading] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function loadEvents() {
-      if (!isOpen || !match) return;
-      try {
-        setEventsLoading(true);
-        const q = new URLSearchParams({
-          comp: String(match.competition.code),
-          utcDate: match.utcDate,
-          home: match.homeTeam.name,
-          away: match.awayTeam.name,
-        });
-        const res = await fetch(`/api/af/events?${q.toString()}`, { cache: "no-store" });
-        if (!res.ok) throw new Error(`events ${res.status}`);
-        const data = await res.json();
-        if (!cancelled) setEvents(Array.isArray(data?.events) ? (data.events as AFEvent[]) : []);
-      } catch {
-        if (!cancelled) setEvents([]);
-      } finally {
-        if (!cancelled) setEventsLoading(false);
-      }
-    }
-    loadEvents();
-    return () => { cancelled = true; };
-  }, [isOpen, match]);
+  // Define status checks
+  const isLive = match ? ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status) : false;
+  const isFinished = match ? ["FINISHED", "AWARDED"].includes(match.status) : false;
 
   if (!match) return null;
-
-  const isLive = ["IN_PLAY", "PAUSED", "LIVE"].includes(match.status);
-  const isFinished = ["FINISHED", "AWARDED"].includes(match.status);
   const ko = new Date(match.utcDate);
 
   const getStatusBadge = () => {
@@ -207,51 +169,103 @@ export default function MatchDetailsModal({ match, isOpen, onClose }: MatchDetai
                 </div>
               </div>
 
-              {/* Events: Only render if real data exists */}
-              <div className="p-6 overflow-y-auto max-h-[60vh]">
-                {eventsLoading ? (
-                  <div className="text-center text-sm text-muted-foreground">Loading events…</div>
-                ) : null}
-
-                {!eventsLoading && events && events.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-semibold">Goals</h3>
-                    <div className="space-y-2">
-                      {events.map((e, i) => {
-                        const teamName = e.team === "home" ? match.homeTeam.name : e.team === "away" ? match.awayTeam.name : "";
-                        return (
-                          <motion.div
-                            key={`${e.minute}-${e.player}-${i}`}
-                            className="flex items-center gap-3 p-3 glass-card rounded-lg border border-border/50"
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                          >
-                            <span className="w-10 text-center tabular-nums text-sm font-semibold">{e.minute ?? ""}</span>
-                            <span className="text-lg">⚽</span>
-                            <div className="flex-1 text-sm">
-                              <div className="font-medium truncate">
-                                {teamName}{e.player ? ` • ${e.player}` : ""}
-                              </div>
-                              {(e.assist || e.detail) && (
-                                <div className="text-xs text-muted-foreground truncate">
-                                  {[
-                                    e.assist ? `Assist: ${e.assist}` : null,
-                                    e.detail || null,
-                                  ].filter(Boolean).join(" • ")}
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+              {/* Match Information */}
+              <div className="p-6 space-y-4">
+                <h3 className="text-lg font-bold mb-4">Match Information</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Competition */}
+                  <motion.div
+                    className="p-4 glass-card rounded-lg border border-border/50"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">🏆</span>
+                      <span className="text-xs font-semibold uppercase text-muted-foreground">Competition</span>
                     </div>
-                  </div>
-                )}
+                    <div className="text-sm font-semibold">{match.competition.name}</div>
+                  </motion.div>
 
-                {!eventsLoading && Array.isArray(events) && events.length === 0 && (
-                  <div className="text-center text-sm text-muted-foreground">
-                    No goal events available.
-                  </div>
+                  {/* Status */}
+                  <motion.div
+                    className="p-4 glass-card rounded-lg border border-border/50"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">📊</span>
+                      <span className="text-xs font-semibold uppercase text-muted-foreground">Status</span>
+                    </div>
+                    <div className="text-sm font-semibold">
+                      {isLive ? "🔴 Live" : isFinished ? "✅ Finished" : "⏰ Scheduled"}
+                    </div>
+                  </motion.div>
+
+                  {/* Date & Time */}
+                  <motion.div
+                    className="p-4 glass-card rounded-lg border border-border/50"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">📅</span>
+                      <span className="text-xs font-semibold uppercase text-muted-foreground">Date & Time</span>
+                    </div>
+                    <div className="text-sm font-semibold">
+                      {format(ko, "MMM d, yyyy")}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {format(ko, "HH:mm")} (Local time)
+                    </div>
+                  </motion.div>
+
+                  {/* Score */}
+                  <motion.div
+                    className="p-4 glass-card rounded-lg border border-border/50"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">⚽</span>
+                      <span className="text-xs font-semibold uppercase text-muted-foreground">Final Score</span>
+                    </div>
+                    <div className="text-2xl font-bold">
+                      {match.score.fullTime.home ?? "-"} - {match.score.fullTime.away ?? "-"}
+                    </div>
+                    {match.score.halfTime.home !== null && (
+                      <div className="text-xs text-muted-foreground">
+                        HT: {match.score.halfTime.home} - {match.score.halfTime.away}
+                      </div>
+                    )}
+                  </motion.div>
+                </div>
+
+                {/* Additional Info */}
+                {(match.score.winner || isFinished) && (
+                  <motion.div
+                    className="p-4 glass-card rounded-lg border border-primary/30 bg-primary/5"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">🎯</span>
+                      <div>
+                        <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">Result</div>
+                        <div className="text-sm font-bold">
+                          {match.score.winner === "HOME_TEAM" && `${match.homeTeam.name} wins!`}
+                          {match.score.winner === "AWAY_TEAM" && `${match.awayTeam.name} wins!`}
+                          {match.score.winner === "DRAW" && "Match ended in a draw"}
+                          {!match.score.winner && isFinished && "Match completed"}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
                 )}
               </div>
             </div>

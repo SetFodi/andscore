@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 // import { ANDSCORE_BRAND_NAME } from "@/lib/constants";
 import ThemeToggle from "./ThemeToggle";
 import LogoAndscore from "./LogoAndscore";
@@ -17,6 +18,7 @@ import { useState } from "react";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const navigationItems = [
     {
@@ -69,7 +71,7 @@ export default function Header() {
             <nav className="flex items-center gap-1 bg-muted/30 rounded-xl p-1">
               {navigationItems.map((item) => {
                 const IconComponent = item.icon;
-                const isActive = typeof window !== 'undefined' && window.location.pathname === item.href;
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
@@ -81,7 +83,7 @@ export default function Header() {
                         : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                     }`}
                   >
-                    <IconComponent className={`w-4 h-4 ${isActive ? "" : "group-hover:text-primary"} transition-colors`} />
+                    <IconComponent className="w-4 h-4 transition-colors" />
                     <span>{item.label}</span>
                   </Link>
                 );

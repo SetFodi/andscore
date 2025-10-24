@@ -9,57 +9,48 @@ interface FootballLoaderProps {
 }
 
 export default function FootballLoader({ isLoading, onComplete }: FootballLoaderProps) {
-  const [loadingStage, setLoadingStage] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [windowSize, setWindowSize] = useState({ width: 1200, height: 800 });
+  const [messageIndex, setMessageIndex] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
 
   const loadingMessages = [
-    "Warming up the pitch...",
-    "Loading team lineups...",
-    "Checking match schedules...",
-    "Preparing live scores...",
-    "Almost ready to kick off!"
+    "Preparing the pitch",
+    "Loading teams",
+    "Checking fixtures",
+    "Updating scores",
+    "Almost ready"
   ];
 
   useEffect(() => {
-    // Set mounted state and initial window size
     setIsMounted(true);
-
-    if (typeof window !== 'undefined') {
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-
-      const handleResize = () => {
-        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-      };
-
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
   }, []);
 
   useEffect(() => {
     if (!isLoading) return;
 
-    const interval = setInterval(() => {
+    // Smooth progress animation
+    const progressInterval = setInterval(() => {
       setProgress(prev => {
-        const newProgress = prev + Math.random() * 15 + 5;
+        const increment = Math.random() * 8 + 4;
+        const newProgress = Math.min(prev + increment, 100);
+        
         if (newProgress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => onComplete?.(), 500);
-          return 100;
+          clearInterval(progressInterval);
+          setTimeout(() => onComplete?.(), 300);
         }
+        
         return newProgress;
       });
-    }, 300);
+    }, 200);
 
-    const stageInterval = setInterval(() => {
-      setLoadingStage(prev => (prev + 1) % loadingMessages.length);
-    }, 1000);
+    // Message rotation
+    const messageInterval = setInterval(() => {
+      setMessageIndex(prev => (prev + 1) % loadingMessages.length);
+    }, 1200);
 
     return () => {
-      clearInterval(interval);
-      clearInterval(stageInterval);
+      clearInterval(progressInterval);
+      clearInterval(messageInterval);
     };
   }, [isLoading, onComplete, loadingMessages.length]);
 
@@ -68,167 +59,179 @@ export default function FootballLoader({ isLoading, onComplete }: FootballLoader
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[9999] bg-gradient-to-br from-field-primary via-field-secondary to-field-primary flex items-center justify-center"
+        className="fixed inset-0 z-[9999] bg-gradient-to-br from-background via-background to-background/95 flex items-center justify-center backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.3 }}
       >
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 overflow-hidden">
-          {/* Field Lines */}
-          <motion.div
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className="absolute inset-4 border-2 border-white/20 rounded-lg">
-              <div className="absolute top-1/2 left-0 right-0 h-px bg-white/20 transform -translate-y-1/2" />
-              <div className="absolute top-1/2 left-1/2 w-32 h-32 border-2 border-white/20 rounded-full transform -translate-x-1/2 -translate-y-1/2" />
-              <div className="absolute top-1/2 left-0 w-16 h-24 border-2 border-white/20 border-l-0 rounded-r-lg transform -translate-y-1/2" />
-              <div className="absolute top-1/2 right-0 w-16 h-24 border-2 border-white/20 border-r-0 rounded-l-lg transform -translate-y-1/2" />
-            </div>
-          </motion.div>
-
-          {/* Floating Footballs */}
-          {Array.from({ length: 5 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-8 h-8 bg-white rounded-full shadow-lg"
-              initial={{
-                x: Math.random() * windowSize.width,
-                y: Math.random() * windowSize.height,
-                opacity: 0
-              }}
-              animate={{
-                x: Math.random() * windowSize.width,
-                y: Math.random() * windowSize.height,
-                opacity: [0, 0.3, 0],
-                rotate: 360
-              }}
-              transition={{
-                duration: 8 + Math.random() * 4,
-                repeat: Infinity,
-                delay: i * 0.5
-              }}
-            >
-              {/* Football pattern */}
-              <div className="absolute inset-1 rounded-full border border-gray-800">
-                <div className="absolute top-1/2 left-1/2 w-2 h-px bg-gray-800 transform -translate-x-1/2 -translate-y-1/2" />
-                <div className="absolute top-1/2 left-1/2 w-px h-2 bg-gray-800 transform -translate-x-1/2 -translate-y-1/2" />
-              </div>
-            </motion.div>
-          ))}
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div 
+            className="absolute inset-0" 
+            style={{
+              backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)`,
+              backgroundSize: '40px 40px'
+            }}
+          />
         </div>
 
-        {/* Main Loading Content */}
-        <div className="relative z-10 text-center text-white">
-          {/* Rolling Football */}
+        {/* Main content */}
+        <div className="relative z-10 flex flex-col items-center">
+          {/* Enhanced Football Animation */}
+          <div className="relative mb-12">
+            {/* Glow effect */}
+            <motion.div
+              className="absolute inset-0 rounded-full blur-2xl opacity-30"
+              style={{
+                background: "radial-gradient(circle, var(--primary) 0%, transparent 70%)"
+              }}
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.2, 0.4, 0.2]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+
+            {/* Football using actual image */}
+            <motion.div
+              className="relative w-24 h-24"
+              animate={{
+                rotate: 360,
+                y: [0, -15, 0],
+              }}
+              transition={{
+                rotate: { duration: 4, repeat: Infinity, ease: "linear" },
+                y: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+              }}
+            >
+              <Image
+                src="/football.png"
+                alt="Football"
+                width={96}
+                height={96}
+                className="w-full h-full drop-shadow-2xl"
+                priority
+              />
+            </motion.div>
+            
+            {/* Dynamic shadow */}
+            <motion.div
+              className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-20 h-4 rounded-full"
+              style={{
+                background: "radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, transparent 70%)",
+                filter: "blur(4px)"
+              }}
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.4, 0.25, 0.4]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          </div>
+
+          {/* Brand name */}
           <motion.div
-            className="relative mx-auto mb-8 w-20 h-20"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <div className="w-full h-full bg-white rounded-full shadow-2xl relative overflow-hidden">
-              {/* Football pattern */}
-              <div className="absolute inset-2 rounded-full">
-                <div className="absolute top-1/2 left-1/2 w-8 h-px bg-gray-800 transform -translate-x-1/2 -translate-y-1/2" />
-                <div className="absolute top-1/2 left-1/2 w-px h-8 bg-gray-800 transform -translate-x-1/2 -translate-y-1/2" />
-                <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-gray-800 rounded-full" />
-                <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-gray-800 rounded-full" />
-                <div className="absolute top-1/4 right-1/4 w-1 h-1 bg-gray-800 rounded-full" />
-                <div className="absolute top-3/4 left-1/4 w-1 h-1 bg-gray-800 rounded-full" />
-              </div>
-            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent">
+              AndScore
+            </h1>
           </motion.div>
 
-          {/* Brand Name */}
-          <motion.h1
-            className="text-4xl font-bold mb-4 text-white drop-shadow-lg"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            andscore
-          </motion.h1>
+          {/* Loading message with smooth transition */}
+          <div className="h-6 mb-8 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={messageIndex}
+                className="text-base font-medium text-muted-foreground"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                {loadingMessages[messageIndex]}...
+              </motion.p>
+            </AnimatePresence>
+          </div>
 
-          {/* Loading Message */}
-          <motion.p
-            className="text-lg mb-8 text-white/90 font-medium"
-            key={loadingStage}
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -10, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {loadingMessages[loadingStage]}
-          </motion.p>
-
-          {/* Progress Bar */}
-          <div className="w-80 max-w-sm mx-auto">
-            <div className="relative h-2 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+          {/* Modern progress bar */}
+          <div className="w-72 space-y-3">
+            <div className="relative h-2 bg-muted/50 rounded-full overflow-hidden backdrop-blur-sm">
+              {/* Progress fill with gradient */}
               <motion.div
-                className="absolute left-0 top-0 h-full bg-white rounded-full shadow-lg"
+                className="absolute left-0 top-0 h-full rounded-full"
+                style={{
+                  background: "linear-gradient(90deg, var(--primary), var(--primary) 60%, var(--primary)/70)",
+                  boxShadow: "0 0 10px var(--primary)/30"
+                }}
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
               />
               
-              {/* Moving highlight */}
+              {/* Animated shimmer */}
               <motion.div
-                className="absolute top-0 h-full w-8 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                animate={{ x: [-32, 320] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                className="absolute top-0 h-full w-16"
+                style={{
+                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)"
+                }}
+                animate={{
+                  x: ["-4rem", "20rem"]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
               />
             </div>
             
-            {/* Progress Text */}
-            <motion.p
-              className="text-center mt-3 text-white/80 text-sm font-medium"
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              {Math.round(progress)}%
-            </motion.p>
-          </div>
-
-          {/* League Logos Preview */}
-          <motion.div
-            className="flex items-center justify-center gap-4 mt-8 opacity-30"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 0.3 }}
-            transition={{ delay: 1 }}
-          >
-            {[
-              "/premier-league-1.svg",
-              "/LaLiga_logo_2023.svg.png", 
-              "/Serie_A_logo_2022.svg.png",
-              "/Bundesliga_logo_(2017).svg.png",
-              "/UEFA_Champions_League.svg.png"
-            ].map((logo, i) => (
-              <motion.div
-                key={i}
-                className="w-8 h-8 relative"
-                animate={{ 
-                  scale: [1, 1.1, 1],
-                  opacity: [0.3, 0.6, 0.3]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  delay: i * 0.2
-                }}
+            {/* Progress percentage */}
+            <div className="flex items-center justify-between text-sm">
+              <motion.span
+                className="text-muted-foreground font-medium"
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity }}
               >
-                <Image
-                  src={logo}
-                  alt=""
-                  fill
-                  className="object-contain filter brightness-0 invert"
-                />
+                {Math.round(progress)}%
+              </motion.span>
+              
+              <motion.div
+                className="flex gap-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1 h-1 rounded-full bg-primary"
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [0.3, 1, 0.3]
+                    }}
+                    transition={{
+                      duration: 1.2,
+                      repeat: Infinity,
+                      delay: i * 0.2
+                    }}
+                  />
+                ))}
               </motion.div>
-            ))}
-          </motion.div>
+            </div>
+          </div>
         </div>
       </motion.div>
     </AnimatePresence>
