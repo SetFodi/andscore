@@ -42,25 +42,26 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
 
   return (
     <motion.div
-      className="group relative flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer border-b border-border/30 last:border-b-0"
+      className="group relative flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 hover:bg-muted/30 active:bg-muted/40 transition-colors cursor-pointer border-b border-border/30 last:border-b-0"
       onClick={onClick}
       whileHover={{ x: 2 }}
+      whileTap={{ scale: 0.995 }}
       transition={{ duration: 0.15 }}
       suppressHydrationWarning
     >
       {/* Time / Status */}
-      <div className="w-16 shrink-0 text-center">
+      <div className="w-12 md:w-16 shrink-0 text-center">
         {isLive ? (
           <div className="flex flex-col items-center">
-            <span className="text-xs font-bold text-red-500 animate-pulse">LIVE</span>
-            <span className="text-[10px] text-red-500 font-semibold tabular-nums">
+            <span className="text-[10px] md:text-xs font-bold text-red-500 animate-pulse">LIVE</span>
+            <span className="text-[9px] md:text-[10px] text-red-500 font-semibold tabular-nums">
               {getLiveMinute(match) || ""}
             </span>
           </div>
         ) : isFinished ? (
-          <span className="text-xs font-semibold text-emerald-600">FT</span>
+          <span className="text-[10px] md:text-xs font-semibold text-emerald-600">FT</span>
         ) : (
-          <span className="text-xs font-medium text-muted-foreground tabular-nums">
+          <span className="text-[10px] md:text-xs font-medium text-muted-foreground tabular-nums">
             {formatKickoffTime(match.utcDate)}
           </span>
         )}
@@ -69,21 +70,21 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
       {/* Teams and Scores */}
       <div className="flex-1 min-w-0">
         {/* Home Team */}
-        <div className="flex items-center justify-between gap-2 mb-1">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-1.5 md:gap-2 mb-0.5 md:mb-1">
+          <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={match.homeTeam.crest}
               alt=""
-              className="w-5 h-5 object-contain shrink-0"
+              className="w-4 md:w-5 h-4 md:h-5 object-contain shrink-0"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
-            <span className={`text-sm truncate ${homeWinner ? "font-bold" : "font-medium"}`}>
+            <span className={`text-xs md:text-sm truncate ${homeWinner ? "font-bold" : "font-medium"}`}>
               {match.homeTeam.name}
             </span>
           </div>
           <span 
-            className={`text-sm font-bold tabular-nums w-6 text-right ${
+            className={`text-xs md:text-sm font-bold tabular-nums w-5 md:w-6 text-right ${
               homeWinner ? "text-primary" : ""
             }`}
             suppressHydrationWarning
@@ -93,21 +94,21 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
         </div>
 
         {/* Away Team */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-1.5 md:gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2 min-w-0 flex-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={match.awayTeam.crest}
               alt=""
-              className="w-5 h-5 object-contain shrink-0"
+              className="w-4 md:w-5 h-4 md:h-5 object-contain shrink-0"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
-            <span className={`text-sm truncate ${awayWinner ? "font-bold" : "font-medium"}`}>
+            <span className={`text-xs md:text-sm truncate ${awayWinner ? "font-bold" : "font-medium"}`}>
               {match.awayTeam.name}
             </span>
           </div>
           <span 
-            className={`text-sm font-bold tabular-nums w-6 text-right ${
+            className={`text-xs md:text-sm font-bold tabular-nums w-5 md:w-6 text-right ${
               awayWinner ? "text-primary" : ""
             }`}
             suppressHydrationWarning
@@ -124,13 +125,13 @@ function CompactMatchRowCmp({ match, onClick, isFavorite, onToggleFavorite }: Co
             e.stopPropagation();
             onToggleFavorite();
           }}
-          className="shrink-0 p-1 hover:scale-110 transition-transform"
+          className="shrink-0 p-1.5 md:p-1 hover:scale-110 active:scale-95 transition-transform touch-manipulation"
           aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
           {isFavorite ? (
-            <StarSolidIcon className="w-4 h-4 text-yellow-500" />
+            <StarSolidIcon className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" />
           ) : (
-            <StarOutlineIcon className="w-4 h-4 text-muted-foreground hover:text-yellow-500" />
+            <StarOutlineIcon className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground hover:text-yellow-500" />
           )}
         </button>
       )}
